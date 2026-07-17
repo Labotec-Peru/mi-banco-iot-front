@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
-import { Input, Select, SelectItem, Button, Pagination, Skeleton, DateRangePicker } from "@heroui/react";
+import { Input, Select, SelectItem, Button, Pagination, Skeleton, DateRangePicker, DatePicker } from "@heroui/react";
+import type { RangeValue, DateValue } from "@heroui/react";
 import { Magnifer, AltArrowDown, AltArrowUp } from "@solar-icons/react";
-import { parseAbsoluteToLocal, ZonedDateTime } from "@internationalized/date";
 
 export interface CustomColumnDef<T> {
   key: string;
@@ -21,7 +21,7 @@ export interface ColumnGroupDef {
 
 export interface FilterFieldDef {
   key: string;
-  type: "text" | "select" | "dateRange";
+  type: "text" | "select" | "dateRange" | "date";
   placeholder?: string;
   options?: { value: string; label: string }[];
 }
@@ -31,13 +31,13 @@ export interface CustomTableProps<T extends Record<string, any>> {
   columns: CustomColumnDef<T>[];
   columnGroups?: ColumnGroupDef[];
   idField: string;
-
   filters?: FilterFieldDef[];
   filterValues: Record<string, string>;
   onFilterChange: (key: string, value: string) => void;
   onClearFilters?: () => void;
   headerActions?: ReactNode;
-
+  dateValue?: DateValue | null;
+  onDateChange?: (date: DateValue | null) => void;
   sortDescriptor: { column: string; direction: "ascending" | "descending" };
   onSortChange: (d: {
     column: string;
@@ -53,6 +53,9 @@ export interface CustomTableProps<T extends Record<string, any>> {
 
   isLoading?: boolean;
   maxBodyHeight?: string;
+
+  dateRangeValue?: RangeValue<DateValue> | null;
+  onDateRangeChange?: (range: RangeValue<DateValue> | null) => void;
 }
 
 const GROUP_ROW_HEIGHT = 34;
@@ -77,6 +80,10 @@ export default function TableComponent<T extends Record<string, any>>({
   onPageSizeChange,
   isLoading,
   maxBodyHeight = "560px",
+  dateRangeValue,
+  onDateRangeChange,
+  dateValue,
+  onDateChange,
 }: CustomTableProps<T>) {
   const totalPages = Math.max(1, Math.ceil(totalRegistros / pageSize));
 
@@ -103,21 +110,6 @@ export default function TableComponent<T extends Record<string, any>>({
   };
 
 
-  const getDateRangeValue = (valueStr?: string) => {
-    if (!valueStr) return null;
-    try {
-      const [start, end] = valueStr.split(",");
-      if (start && end) {
-        return {
-          start: parseAbsoluteToLocal(start),
-          end: parseAbsoluteToLocal(end),
-        };
-      }
-    } catch (e) {
-      console.error("Error parseando rango de fechas:", e);
-    }
-    return null;
-  };
 
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-slate-100 w-full max-w-full flex flex-col">
@@ -147,28 +139,33 @@ export default function TableComponent<T extends Record<string, any>>({
             }
 
             if (f.type === "dateRange") {
-              const currentRangeValue = getDateRangeValue(filterValues[f.key]);
               return (
                 <DateRangePicker
                   key={f.key}
                   size="md"
                   radius="md"
-                  className="w-72" 
+                  className="w-72"
                   aria-label={f.placeholder ?? "Rango de fechas"}
-                  value={currentRangeValue as any}
-                  onChange={(range) => {
-                    if (range && range.start && range.end) {
-                      const startIso = range.start.toDate().toISOString();
-                      const endIso = range.end.toDate().toISOString();
-                      onFilterChange(f.key, `${startIso},${endIso}`);
-                    } else {
-                      onFilterChange(f.key, "");
-                    }
-                  }}
+                  value={dateRangeValue as any}
+                  onChange={onDateRangeChange as any}
+                  granularity="day"
                 />
               );
             }
-
+            if (f.type === "date") {
+              return (
+                <DatePicker
+                  key={f.key}
+                  size="md"
+                  radius="md"
+                  className="w-52"
+                  aria-label={f.placeholder ?? "Fecha"}
+                  value={dateValue as any}
+                  onChange={onDateChange as any}
+                  granularity="day"
+                />
+              );
+            }
             return (
               <Input
                 key={f.key}
@@ -194,7 +191,6 @@ export default function TableComponent<T extends Record<string, any>>({
         </div>
       )}
 
-      {/* El resto de la tabla permanece exactamente igual */}
       <div className="w-full overflow-auto" style={{ maxHeight: maxBodyHeight }}>
         <table className="border-collapse text-sm w-max min-w-full">
           {columnGroups && columnGroups.length > 0 && (
@@ -295,8 +291,8 @@ export default function TableComponent<T extends Record<string, any>>({
                         ...(col.sticky ? { left: stickyOffsets[col.key] } : {}),
                       }}
                       className={`px-3 py-2 text-xs text-zinc-500 border-b border-slate-50 whitespace-nowrap ${col.sticky
-                          ? "sticky z-10 bg-white group-hover:bg-slate-50 shadow-[1px_0_0_0_rgba(0,0,0,0.06)]"
-                          : ""
+                        ? "sticky z-10 bg-white group-hover:bg-slate-50 shadow-[1px_0_0_0_rgba(0,0,0,0.06)]"
+                        : ""
                         } ${col.align === "center"
                           ? "text-center"
                           : col.align === "end"

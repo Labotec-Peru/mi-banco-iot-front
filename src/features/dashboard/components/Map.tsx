@@ -31,13 +31,15 @@ interface MapProps {
   talleres: Taller[];
   mapStyle: string;
   onFilterFromChart?: (estadoLabel: string) => void;
+  onClearFilters?: () => void;
 }
 
 export default function Map({ 
   neveras, 
   talleres, 
   mapStyle, 
-  onFilterFromChart 
+  onFilterFromChart,
+  onClearFilters
 }: MapProps) {
   const mapContainerRef = useRef<HTMLDivElement>(null!);
   const mapRef = useRef<mapboxgl.Map | null>(null);
@@ -84,6 +86,7 @@ export default function Map({
         <GraphicsCountNeveras 
           layout="sidebar" 
           onFilterByEstado={onFilterFromChart}
+          onClearFilters={onClearFilters}
         />
       </div>
       

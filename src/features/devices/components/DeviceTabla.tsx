@@ -3,7 +3,7 @@ import TableComponent, {
     type CustomColumnDef,
     type FilterFieldDef,
 } from "../../../components/ux/TableComponent";
-import { useGetDeviceQuery } from "../services/deviceApi";
+import { useGetDeviceQuery, useGetContadorRegistrosPaginasQuery } from "../services/deviceApi";
 import type { DeviceItem } from "../services/deviceApi";
 import {  Chip } from "@heroui/react";
 import { LightbulbBolt, LightbulbMinimalistic } from "@solar-icons/react";
@@ -30,7 +30,12 @@ export default function DeviceTabla() {
     });
 
     const devices = data?.data ?? [];
-    const totalRegistros = data?.totalRegistros ?? 0;
+
+      const { data: paginacionData, isLoading: isLoadingPaginacion } = useGetContadorRegistrosPaginasQuery({
+          _cod_nevera: filterValues.cod_nevera,
+          _page: page,
+          _size: pageSize,
+      });
 
     const columns: CustomColumnDef<DeviceItem>[] = useMemo(
         () => [
@@ -99,7 +104,7 @@ export default function DeviceTabla() {
                 render: (item) => (
                     <div className="flex items-center gap-1">
                         {item.dis_energia === "Conectado" ? (
-                            <span className="flex items-center gap-1 text-green-600">
+                            <span className="flex items-center gap-1 text-amber-600">
                                 <LightbulbBolt weight="Bold" size={18} />
                                 <span>ON</span>
                             </span>
@@ -149,12 +154,12 @@ export default function DeviceTabla() {
     const filters: FilterFieldDef[] = [
         { key: "cod_nevera", type: "text", placeholder: "Cod Nevera" },
     ];
-
+  const totalRegistros = paginacionData?.total_records ?? 0;
     return (
         <TableComponent
             data={devices}
             columns={columns}
-            idField="dis_cod_nevera"
+            idField="dis_id"
             filters={filters}
             filterValues={filterValues}
             onFilterChange={(key, value) => {
@@ -180,7 +185,7 @@ export default function DeviceTabla() {
                 setPageSize(size);
                 setPage(1);
             }}
-            isLoading={isLoading || isFetching}
+            isLoading={isLoading || isFetching || isLoadingPaginacion}
         />
     );
 }

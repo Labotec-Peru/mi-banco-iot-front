@@ -1,12 +1,13 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import TableComponent, {
     type CustomColumnDef,
     type FilterFieldDef,
 } from "../../../components/ux/TableComponent";
-import { useGetAlertsHistoricalQuery } from "../services/alertsApi";
+import { useGetAlertsHistoricalQuery, useGetAlertsHistoricalCountQuery } from "../services/alertsApi";
 import type { AlertsFilters, AlertsItem } from "../services/alertsApi";
-import { Chip } from "@heroui/react";
+import { Chip, type DateValue } from "@heroui/react";
 import { LightbulbBolt, LightbulbMinimalistic } from "@solar-icons/react";
+import { useTodayDate } from "../../../hooks/useTodayDate";
 
 const PAGE_SIZE_DEFAULT = 15;
 
@@ -19,19 +20,13 @@ export default function AlertsTabla() {
         _fecha_hora: "",
         _imei: "",
         _locacion: "",
-        _or: "",
-        _order: "",
+        _or: "desc",
+        _order: "dis_ult_conex",
         _page: 1,
         _size: PAGE_SIZE_DEFAULT,
     });
-    const [page, setPage] = useState(1);
-    const [pageSize, setPageSize] = useState(PAGE_SIZE_DEFAULT);
-    const [sortDescriptor, setSortDescriptor] = useState<{
-        column: string;
-        direction: "ascending" | "descending";
-    }>({ column: "dis_ult_conex", direction: "descending" });
 
-    const { data, isLoading, isFetching } = useGetAlertsHistoricalQuery({
+    const countFilters: AlertsFilters = {
         _cliente: filterValues._cliente,
         _cod_nevera: filterValues._cod_nevera,
         _distribuidor: filterValues._distribuidor,
@@ -39,14 +34,45 @@ export default function AlertsTabla() {
         _fecha_hora: filterValues._fecha_hora,
         _imei: filterValues._imei,
         _locacion: filterValues._locacion,
-        _or: filterValues._or,
-        _order: filterValues._order,
-        _page: filterValues._page,
-        _size: filterValues._size,
-    });
+    };
+
+    const [page, setPage] = useState(1);
+    const [pageSize, setPageSize] = useState(PAGE_SIZE_DEFAULT);
+
+    const [sortDescriptor, setSortDescriptor] = useState<{
+        column: string;
+        direction: "ascending" | "descending";
+    }>({ column: "dis_ult_conex", direction: "descending" });
+    const today = useTodayDate();
+    const [dateValue, setDateValue] = useState<DateValue | null>(today);
+
+    const queryFilters: AlertsFilters = {
+        ...countFilters,
+        _or: sortDescriptor.direction === "ascending" ? "asc" : "desc",
+        _order: sortDescriptor.column,
+        _page: page,
+        _size: pageSize,
+    };
+
+    const { data, isLoading, isFetching } = useGetAlertsHistoricalQuery(queryFilters);
+
+
+    const { data: countData, isLoading: isCountLoading } = useGetAlertsHistoricalCountQuery(countFilters);
 
     const alerts = data?.data ?? [];
-    const totalRegistros = data?.totalRegistros ?? 0;
+    const totalRegistros = countData?.total_records ?? 0;
+
+    const handleDateChange = useCallback((date: DateValue | null) => {
+        setDateValue(date);
+        if (date) {
+            const formatted = `${date.year}-${String(date.month).padStart(2, '0')}-${String(date.day).padStart(2, '0')}`;
+            setFilterValues((prev) => ({ ...prev, _fecha_hora: formatted }));
+        } else {
+            setFilterValues((prev) => ({ ...prev, _fecha_hora: "" }));
+        }
+        setPage(1);
+    }, []);
+
     const columns: CustomColumnDef<AlertsItem>[] = useMemo(
         () => [
             {
@@ -63,9 +89,7 @@ export default function AlertsTabla() {
                     </div>
                 ),
             },
-
             { key: "alert_dis_distribuidor", label: "Distribuidor", width: 130 },
-
             { key: "alert_loc_nom", label: "Locación", width: 130 },
             {
                 key: "alert_dis_bateria",
@@ -76,32 +100,17 @@ export default function AlertsTabla() {
                     const pct = Number(value.replace("%", "").trim());
 
                     if (Number.isNaN(pct)) {
-                        return (
-                            <span className="text-xs text-slate-500">
-                                {value}
-                            </span>
-                        );
+                        return <span className="text-xs text-slate-500">{value}</span>;
                     }
 
-                    const color =
-                        pct > 50
-                            ? "bg-green-500"
-                            : pct > 20
-                                ? "bg-amber-500"
-                                : "bg-red-500";
+                    const color = pct > 50 ? "bg-green-500" : pct > 20 ? "bg-amber-500" : "bg-red-500";
 
                     return (
                         <div className="flex items-center gap-2">
                             <div className="w-16 h-1.5 rounded-full bg-slate-100 overflow-hidden">
-                                <div
-                                    className={`h-full ${color}`}
-                                    style={{ width: `${pct}%` }}
-                                />
+                                <div className={`h-full ${color}`} style={{ width: `${pct}%` }} />
                             </div>
-
-                            <span className="text-xs text-slate-500">
-                                {pct}%
-                            </span>
+                            <span className="text-xs text-slate-500">{pct}%</span>
                         </div>
                     );
                 },
@@ -130,7 +139,7 @@ export default function AlertsTabla() {
             { key: "alert_dis_lat", label: "Latitud", width: 130 },
             { key: "alert_dis_lon", label: "Longitud", width: 130 },
             { key: "alert_dis_signal", label: "Señal", width: 130 },
-            { key: "alert_dis_satelite", label: "Satélite", width: 130, },
+            { key: "alert_dis_satelite", label: "Satélite", width: 130 },
             {
                 key: "alert_evento",
                 label: "Estado",
@@ -142,7 +151,6 @@ export default function AlertsTabla() {
                         "desconexión por energía": "warning",
                         "detenido fuera de zona": "danger",
                         "movimiento fuera de zona": "secondary",
-
                     };
                     return (
                         <Chip size="sm" variant="light" color={map[estado] ?? "default"}>
@@ -157,61 +165,72 @@ export default function AlertsTabla() {
         []
     );
 
-
-
-
     const filters: FilterFieldDef[] = [
-        { key: "alert_dis_cod_nevera", type: "text", placeholder: "Cod Nevera" },
+        { key: "_cod_nevera", type: "text", placeholder: "Cod Nevera" },
         { key: "_cliente", type: "text", placeholder: "Cliente" },
         { key: "_distribuidor", type: "text", placeholder: "Distribuidor" },
         { key: "_evento", type: "text", placeholder: "Evento" },
-        { key: "_fecha_hora", type: "text", placeholder: "Fecha/Hora" },
+        { key: "_fecha", type: "date", placeholder: "Fecha" },
         { key: "_imei", type: "text", placeholder: "IMEI" },
-        { key: "_locacion", type: "text", placeholder: "Locación" },       
+        { key: "_locacion", type: "text", placeholder: "Locación" },
     ];
 
-    return (
+    const handleClearFilters = () => {
+        setFilterValues({
+            _cliente: "",
+            _cod_nevera: "",
+            _distribuidor: "",
+            _evento: "",
+            _fecha_hora: "",
+            _imei: "",
+            _locacion: "",
+            _or: "desc",
+            _order: "dis_ult_conex",
+            _page: 1,
+            _size: PAGE_SIZE_DEFAULT,
+        });
+        setDateValue(today);
+        setPage(1);
+    };
 
-        <TableComponent
-            data={alerts}
-            columns={columns}
-            idField="alert_dis_cod_nevera"
-            filters={filters}
-            filterValues={filterValues as Record<string, string>}
-            onFilterChange={(key, value) => {
-                setFilterValues((prev) => ({ ...prev, [key]: value }));
-                setPage(1);
-            }}
-            onClearFilters={() => {
-                setFilterValues({
-                    _cliente: "",
-                    _cod_nevera: "",
-                    _distribuidor: "",
-                    _evento: "",
-                    _fecha_hora: "",
-                    _imei: "",
-                    _locacion: "",
-                    _or: "",
-                    _order: "",
-                    _page: 1,
-                    _size: PAGE_SIZE_DEFAULT,
-                });
-                setPage(1);
-            }}
-            sortDescriptor={sortDescriptor}
-            onSortChange={(d) => {
-                setSortDescriptor(d);
-                setPage(1);
-            }}
-            page={page}
-            pageSize={pageSize}
-            totalRegistros={totalRegistros}
-            onPageChange={setPage}
-            onPageSizeChange={(size) => {
-                setPageSize(size);
-                setPage(1);
-            }}
-            isLoading={isLoading || isFetching}
-        />
+    const alertsWithUniqueId = useMemo(() => {
+        return alerts.map((alert, index) => ({
+            ...alert,
+            _uniqueId: `${alert.alert_dis_cod_nevera}_${alert.alert_dis_fechahora}_${alert.alert_evento}_${index}`,
+        }));
+    }, [alerts]);
+
+    return (
+        <div>
+            <TableComponent
+                data={alertsWithUniqueId}
+                columns={columns}
+                idField="_uniqueId"
+                filters={filters}
+                filterValues={filterValues as Record<string, string>}
+                onFilterChange={(key, value) => {
+                    if (key === "_fecha") return;
+                    setFilterValues((prev) => ({ ...prev, [key]: value }));
+                    setPage(1);
+                }}
+                onClearFilters={handleClearFilters}
+                sortDescriptor={sortDescriptor}
+                onSortChange={(d) => {
+                    setSortDescriptor(d);
+                    setPage(1);
+                }}
+                page={page}
+                pageSize={pageSize}
+                totalRegistros={totalRegistros}
+                onPageChange={setPage}
+                onPageSizeChange={(size) => {
+                    setPageSize(size);
+                    setPage(1);
+                }}
+                dateValue={dateValue}
+                onDateChange={handleDateChange}
+                isLoading={isLoading || isFetching || isCountLoading}
+            />
+        </div>
     );
 }

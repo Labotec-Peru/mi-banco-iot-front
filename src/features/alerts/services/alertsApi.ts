@@ -1,5 +1,6 @@
 import { apiSlice } from "../../../app/apiSlice";
 import { API_NESTLE } from "../../../config/env";
+import type { PaginacionResponse } from "../../../config/types";
 
 export interface AlertsItem {
     alert_dis_cod_nevera: string;
@@ -31,6 +32,21 @@ export interface AlertsFilters {
     _size?: number;
 }
 
+export interface AlertsHistorialFilters {
+    _cliente?: string;
+    _cod_nevera?: string;
+    _distribuidor?: string;
+    _evento?: string;
+    _fecha_inicio?: string;
+    _fecha_fin?: string;
+    _imei?: string;
+    _locacion?: string;
+    _or?: string;
+    _order?: string;
+    _page?: number;
+    _size?: number;
+}
+
 export interface AlertsResponse {
     status: boolean;
     message?: string;
@@ -45,36 +61,68 @@ export const alertsApi = apiSlice.injectEndpoints({
                 url: `${API_NESTLE}/api/Consultas/listaAlertasActivasV2`,
                 method: "POST",
                 body: {
-                    _cliente: filters._cliente,
-                    _cod_nevera: filters._cod_nevera,
-                    _distribuidor: filters._distribuidor,
-                    _evento: filters._evento,
-                    _fecha_hora: filters._fecha_hora,
-                    _imei: filters._imei,
-                    _locacion: filters._locacion,
-                    _or: filters._or,
-                    _order: filters._order,
-                    _page: filters._page,
-                    _size: filters._size,
+                    _cliente: filters._cliente ?? "",
+                    _cod_nevera: filters._cod_nevera ?? "",
+                    _distribuidor: filters._distribuidor ?? "",
+                    _evento: filters._evento ?? "",
+                    _fecha_hora: filters._fecha_hora ?? "",
+                    _imei: filters._imei ?? "",
+                    _locacion: filters._locacion ?? "",
+                    _or: filters._or ?? "desc",
+                    _order: filters._order ?? "dis_ult_conex",
+                    _page: filters._page ?? 1,
+                    _size: filters._size ?? 15,
                 },
             }),
         }),
-        getAlertsHistoricalV2: builder.query<AlertsResponse, AlertsFilters>({
+        getAlertsHistoricalCount: builder.query<PaginacionResponse, AlertsFilters>({
+            query: (filters) => ({
+                url: `${API_NESTLE}/api/Consultas/contadorRegistrosPaginasAlertasActivasV2`,
+                method: "POST",
+                body: {
+                    _cliente: filters._cliente ?? "",
+                    _cod_nevera: filters._cod_nevera ?? "",
+                    _distribuidor: filters._distribuidor ?? "",
+                    _evento: filters._evento ?? "",
+                    _fecha_hora: filters._fecha_hora ?? "",
+                    _imei: filters._imei ?? "",
+                    _locacion: filters._locacion ?? "",
+                },
+            }),
+        }),
+        getAlertsHistoricalV2: builder.query<AlertsResponse, AlertsHistorialFilters>({
             query: (filters) => ({
                 url: `${API_NESTLE}/api/Consultas/listaAlertasHistorialV2`,
                 method: "POST",
                 body: {
-                    _cliente: filters._cliente,
-                    _cod_nevera: filters._cod_nevera,
-                    _distribuidor: filters._distribuidor,
-                    _evento: filters._evento,
-                    _fecha_hora: filters._fecha_hora,
-                    _imei: filters._imei,
-                    _locacion: filters._locacion,
-                    _or: filters._or,
-                    _order: filters._order,
-                    _page: filters._page,
-                    _size: filters._size,
+                    _cliente: filters._cliente ?? "",
+                    _cod_nevera: filters._cod_nevera ?? "",
+                    _distribuidor: filters._distribuidor ?? "",
+                    _evento: filters._evento ?? "",
+                    _fecha_inicio: filters._fecha_inicio ?? "",
+                    _fecha_fin: filters._fecha_fin ?? "",
+                    _imei: filters._imei ?? "",
+                    _locacion: filters._locacion ?? "",
+                    _or: filters._or ?? "desc",
+                    _order: filters._order ?? "dis_ult_conex",
+                    _page: filters._page ?? 1,
+                    _size: filters._size ?? 15,
+                },
+            }),
+        }),
+        getAlertsHistoricalCountV2: builder.query<PaginacionResponse, AlertsHistorialFilters>({
+            query: (filters) => ({
+                url: `${API_NESTLE}/api/Consultas/contadorRegistrosPaginasAlertasHistorialV2`,
+                method: "POST",
+                body: {
+                    _cliente: filters._cliente ?? "",
+                    _cod_nevera: filters._cod_nevera ?? "",
+                    _distribuidor: filters._distribuidor ?? "",
+                    _evento: filters._evento ?? "",
+                    _fecha_inicio: filters._fecha_inicio ?? "",
+                    _fecha_fin: filters._fecha_fin ?? "",
+                    _imei: filters._imei ?? "",
+                    _locacion: filters._locacion ?? "",
                 },
             }),
         }),
@@ -84,7 +132,7 @@ export const alertsApi = apiSlice.injectEndpoints({
 
 export const {
     useGetAlertsHistoricalQuery,
+    useGetAlertsHistoricalCountQuery,
     useGetAlertsHistoricalV2Query,
+    useGetAlertsHistoricalCountV2Query,
 } = alertsApi;
-
-

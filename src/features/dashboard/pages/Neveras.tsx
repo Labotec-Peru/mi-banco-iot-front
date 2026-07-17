@@ -1,57 +1,61 @@
 // Neveras.tsx
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import PageContainer from "../../../layouts/PageContainer";
 import NeverasTabla from "../components/NeverasTabla";
 import GraphicsCountNeveras from "../components/GraphicsCountNeveras";
+import { useNeveraFilterContext } from "../contexts/NeveraFilterContext";
+import { Card, Tab, Tabs, CardBody } from "@heroui/react";
+import GraficoDistribuidor from "../components/GraficoDistribuidor";
 
 export default function Neveras() {
   const [activeFilter, setActiveFilter] = useState<string>("");
+  const { clearAllFilters } = useNeveraFilterContext();
+  const [clearKey, setClearKey] = useState(0);
 
   const handleFilterByEstado = useCallback((estadoLabel: string) => {
     setActiveFilter(estadoLabel);
   }, []);
 
-  const handleClearFilter = useCallback(() => {
+  const handleClearAllFilters = useCallback(() => {
     setActiveFilter("");
+    clearAllFilters(); 
+    setClearKey(prev => prev + 1);
+  }, [clearAllFilters]);
+
+  const handleDistribuidorClick = useCallback((distribuidor: string) => {
+    setActiveFilter(""); 
+  }, []);
+
+  const handleEstadoFromGrafico = useCallback((estado: string) => {
+    setActiveFilter(estado);
   }, []);
 
   return (
     <PageContainer>
-      <div className="grid grid-cols-1 lg:grid-cols-1 gap-2">
-        {activeFilter && (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 flex justify-between items-center">
-            <div className="flex items-center gap-2">
-              <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-              </svg>
-              <span className="text-sm text-blue-800">
-                Filtrando por estado:
-              </span>
-              <span className="font-semibold text-blue-900 bg-blue-100 px-2 py-1 rounded text-sm">
-                {activeFilter}
-              </span>
+      <div className="flex w-full flex-col">
+        <Tabs aria-label="Options">
+          <Tab key="congeladoras" title="Por Congeladoras">
+            <div className="grid grid-cols-1 lg:grid-cols-1 gap-2">
+              <GraphicsCountNeveras             
+                layout="grid"
+                onFilterByEstado={handleFilterByEstado}
+                onClearFilters={handleClearAllFilters}
+              />
             </div>
-            <button
-              onClick={handleClearFilter}
-              className="text-sm text-blue-600 hover:text-blue-800 underline flex items-center gap-1"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-              Limpiar filtro
-            </button>
-          </div>
-        )}
-
-        <GraphicsCountNeveras 
-          layout="grid" 
-          onFilterByEstado={handleFilterByEstado}
-        />
+          </Tab>
+          <Tab key="por_distribuidores" title="Por Distribuidores">
+            <GraficoDistribuidor             
+              onDistribuidorClick={handleDistribuidorClick}
+              onEstadoClick={handleEstadoFromGrafico}
+              onClearFilters={handleClearAllFilters} 
+            />
+          </Tab>
+        </Tabs>
       </div>
 
-      <NeverasTabla 
+      <NeverasTabla
         externalFilter={activeFilter}
-        onClearExternalFilter={handleClearFilter}
+        onClearExternalFilter={handleClearAllFilters}
       />
     </PageContainer>
   );

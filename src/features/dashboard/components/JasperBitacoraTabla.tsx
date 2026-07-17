@@ -1,3 +1,4 @@
+// JasperBitacoraTabla.tsx
 import { useState, useMemo } from "react";
 import TableComponent, {
     type CustomColumnDef,
@@ -12,30 +13,53 @@ const PAGE_SIZE_DEFAULT = 15;
 export default function JasperBitacoraTabla() {
     const [filterValues, setFilterValues] = useState<Record<string, string>>({
         cod_nevera: "",
-        page: "",
-        size: "",
     });
     const [page, setPage] = useState(1);
     const [pageSize, setPageSize] = useState(PAGE_SIZE_DEFAULT);
     const [sortDescriptor, setSortDescriptor] = useState<{
         column: string;
         direction: "ascending" | "descending";
-    }>({ column: "dis_ult_conex", direction: "descending" });
+    }>({ column: "dateSent", direction: "descending" });
 
+    // Traer todos los datos para paginación frontend
     const { data, isLoading, isFetching } = useGetBitacoraJasperReportQuery({
         cod_nevera: filterValues.cod_nevera,
-        page: page,
-        size: pageSize,
+        page: 1,
+        size: 9999,
     });
 
-    const devices = data?.data ?? [];
-    const totalRegistros = data?.totalRegistros ?? 0;
+    const allDevices = data?.data ?? [];
 
+    // ✅ ORDENAR por frontend
+    const sortedDevices = useMemo(() => {
+        return [...allDevices].sort((a, b) => {
+            const col = sortDescriptor.column as keyof JasperReportItem;
+            const aVal = String(a[col] ?? "").toLowerCase();
+            const bVal = String(b[col] ?? "").toLowerCase();
+
+            if (aVal < bVal) return sortDescriptor.direction === "ascending" ? -1 : 1;
+            if (aVal > bVal) return sortDescriptor.direction === "ascending" ? 1 : -1;
+            return 0;
+        });
+    }, [allDevices, sortDescriptor]);
+
+    // ✅ PAGINAR por frontend
+    const totalRegistros = sortedDevices.length;
+
+    const paginatedDevices = useMemo(() => {
+        const start = (page - 1) * pageSize;
+        return sortedDevices.slice(start, start + pageSize);
+    }, [sortedDevices, page, pageSize]);
+
+    const handleFilterChange = (key: string, value: string) => {
+        setFilterValues((prev) => ({ ...prev, [key]: value }));
+        setPage(1);
+    };
 
     const columns: CustomColumnDef<JasperReportItem>[] = useMemo(
         () => [
             {
-                key: "dis_cod_nevera",
+                key: "codigoNevera",
                 label: "Nevera",
                 width: 200,
                 sticky: true,
@@ -77,48 +101,49 @@ export default function JasperBitacoraTabla() {
             },
             { key: "dateModified", label: "Fecha de modificación", width: 130 },
             { key: "dateDispositivo", label: "Fecha del dispositivo", width: 130 },
-
         ],
         []
     );
-
-
 
     const filters: FilterFieldDef[] = [
         { key: "cod_nevera", type: "text", placeholder: "Cod Nevera" },
     ];
 
+    const devicesWithUniqueId = useMemo(() => {
+        return paginatedDevices.map((device, index) => ({
+            ...device,
+            _uniqueId: `${device.smsId}_${device.codigoNevera}_${index}`,
+        }));
+    }, [paginatedDevices]);
+
     return (
-        <TableComponent
-            data={devices}
-            columns={columns}
-            idField="dis_cod_nevera"
-            filters={filters}
-            filterValues={filterValues}
-            onFilterChange={(key, value) => {
-                setFilterValues((prev) => ({ ...prev, [key]: value }));
-                setPage(1);
-            }}
-            onClearFilters={() => {
-                setFilterValues({
-                    cod_nevera: "",
-                });
-                setPage(1);
-            }}
-            sortDescriptor={sortDescriptor}
-            onSortChange={(d) => {
-                setSortDescriptor(d);
-                setPage(1);
-            }}
-            page={page}
-            pageSize={pageSize}
-            totalRegistros={totalRegistros}
-            onPageChange={setPage}
-            onPageSizeChange={(size) => {
-                setPageSize(size);
-                setPage(1);
-            }}
-            isLoading={isLoading || isFetching}
-        />
+        <div>            
+            <TableComponent
+                data={devicesWithUniqueId}
+                columns={columns}
+                idField="_uniqueId"
+                filters={filters}
+                filterValues={filterValues}
+                onFilterChange={handleFilterChange}
+                onClearFilters={() => {
+                    setFilterValues({ cod_nevera: "" });
+                    setPage(1);
+                }}
+                sortDescriptor={sortDescriptor}
+                onSortChange={(d) => {
+                    setSortDescriptor(d);
+                    setPage(1);
+                }}
+                page={page}
+                pageSize={pageSize}
+                totalRegistros={totalRegistros}
+                onPageChange={setPage}
+                onPageSizeChange={(size) => {
+                    setPageSize(size);
+                    setPage(1);
+                }}
+                isLoading={isLoading || isFetching}
+            />
+        </div>
     );
 }

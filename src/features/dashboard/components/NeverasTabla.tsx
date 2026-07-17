@@ -5,9 +5,10 @@ import TableComponent, {
     type ColumnGroupDef,
     type FilterFieldDef,
 } from "../../../components/ux/TableComponent";
-import { useGetNeverasDashboardQuery } from "../services/mapApi";
+import { useGetNeverasDashboardQuery, useGetContadorRegistrosPaginasQuery } from "../services/mapApi";
 import type { NeveraDashboardItem } from "../services/mapApi";
 import { ESTADO_OPTIONS_TABLE, ESTADOS_NEVERA } from "../services/estadoNeveraConstants";
+import { useNeveraFilterContext } from "../contexts/NeveraFilterContext";
 
 const PAGE_SIZE_DEFAULT = 15;
 
@@ -20,11 +21,18 @@ export default function NeverasTabla({
     externalFilter,
     onClearExternalFilter
 }: NeverasTablaProps) {
+    const {
+        distribuidorFilter,
+        estadoFilter,
+        setDistribuidorFilter,
+        setEstadoFilter
+    } = useNeveraFilterContext();
+
     const [filterValues, setFilterValues] = useState<Record<string, string>>({
         cod_nevera: "",
         imei: "",
         locacion: "",
-        distribuidor: "",
+        distribuidor: distribuidorFilter || "",
         estado: "",
     });
     const [page, setPage] = useState(1);
@@ -34,7 +42,27 @@ export default function NeverasTabla({
         direction: "ascending" | "descending";
     }>({ column: "dis_ult_conex", direction: "descending" });
 
-    // Efecto para aplicar filtro externo cuando cambia
+    
+    const queryFilters = {
+        cod_nevera: filterValues.cod_nevera,
+        imei: filterValues.imei,
+        locacion: filterValues.locacion,
+        distribuidor: filterValues.distribuidor,
+        estado: filterValues.estado,
+    };
+
+    const { data, isLoading, isFetching } = useGetNeverasDashboardQuery({
+        ...queryFilters,
+        page,
+        size: pageSize,
+        order: sortDescriptor.column,
+        or: sortDescriptor.direction === "descending" ? "desc" : "asc",
+    });
+
+    const { data: paginacionData, isLoading: isLoadingPaginacion } = useGetContadorRegistrosPaginasQuery(queryFilters);
+
+    const totalRegistros = paginacionData?.total_records ?? 0;
+
     useEffect(() => {
         if (externalFilter) {
             const estado = ESTADOS_NEVERA.find(e =>
@@ -46,31 +74,52 @@ export default function NeverasTabla({
                 setFilterValues(prev => ({ ...prev, estado: estado.filterKey }));
                 setPage(1);
             }
+        } else if (!estadoFilter) {
+            setFilterValues(prev => {
+                if (prev.estado !== "") {
+                    return { ...prev, estado: "" };
+                }
+                return prev;
+            });
+            setPage(1);
         }
     }, [externalFilter]);
 
-    // Efecto para limpiar filtro cuando se solicita externamente
     useEffect(() => {
-        if (!externalFilter) {
-            // Solo limpiar el estado si no hay filtro externo
-            // y el usuario no ha establecido uno manualmente
+        if (distribuidorFilter) {
+            setFilterValues(prev => ({
+                ...prev,
+                distribuidor: distribuidorFilter
+            }));
+            setPage(1);
         }
-    }, [externalFilter]);
 
-    const { data, isLoading, isFetching } = useGetNeverasDashboardQuery({
-        cod_nevera: filterValues.cod_nevera,
-        imei: filterValues.imei,
-        locacion: filterValues.locacion,
-        distribuidor: filterValues.distribuidor,
-        estado: filterValues.estado,
-        page,
-        size: pageSize,
-        order: sortDescriptor.column,
-        or: sortDescriptor.direction === "descending" ? "desc" : "asc",
-    });
+        if (estadoFilter) {
+            setFilterValues(prev => ({
+                ...prev,
+                estado: estadoFilter
+            }));
+            setPage(1);
+        }
+    }, [distribuidorFilter, estadoFilter]);
+
+    const handleFilterChange = (key: string, value: string) => {
+        setFilterValues((prev) => ({ ...prev, [key]: value }));
+        setPage(1);
+
+        if (key === "distribuidor") {
+            setDistribuidorFilter(value);
+        }
+
+        if (key === "estado") {
+            setEstadoFilter(value);
+            if (onClearExternalFilter) {
+                setTimeout(() => onClearExternalFilter(), 0);
+            }
+        }
+    };
 
     const neveras = data?.data ?? [];
-    const totalRegistros = data?.totalRegistros ?? 0;
 
     const columns: CustomColumnDef<NeveraDashboardItem>[] = useMemo(
         () => [
@@ -103,7 +152,6 @@ export default function NeverasTabla({
             { key: "dis_latitud_censo", label: "Latitud Censo", width: 110 },
             { key: "dis_longitud_censo", label: "Longitud Censo", width: 110 },
             { key: "dis_distancia_km_censo", label: "Distancia KM Censo", width: 150 },
-            // { key: "distancia_fuera_de_zona", label: "Distancia Fuera de Zona", width: 150 },
             { key: "dis_iccid", label: "ICCID", width: 150 },
         ],
         []
@@ -157,7 +205,6 @@ export default function NeverasTabla({
                 "dis_longitud_cartera",
                 "dis_distancia_km_cartera",
                 "dis_iccid",
-                // "distancia_fuera_de_zona"
             ],
         },
     ];
@@ -184,25 +231,16 @@ export default function NeverasTabla({
             estado: "",
         });
         setPage(1);
+        setDistribuidorFilter("");
+        setEstadoFilter("");
+
         if (onClearExternalFilter) {
             onClearExternalFilter();
         }
     };
 
     return (
-        <div>
-            {externalFilter && (
-                <div className="mb-2 p-2 bg-blue-50 rounded-lg text-sm text-blue-700 flex items-center gap-2">
-                    <span>🔍 Mostrando resultados para: <strong>{externalFilter}</strong></span>
-                    <button
-                        onClick={handleClearFilters}
-                        className="ml-auto text-blue-600 hover:text-blue-800 underline text-xs"
-                    >
-                        Limpiar filtro
-                    </button>
-                </div>
-            )}
-
+        <div>          
             <TableComponent
                 data={neveras}
                 columns={columns}
@@ -210,13 +248,7 @@ export default function NeverasTabla({
                 idField="dis_cod_nevera"
                 filters={filters}
                 filterValues={filterValues}
-                onFilterChange={(key, value) => {
-                    setFilterValues((prev) => ({ ...prev, [key]: value }));
-                    setPage(1);
-                    if (key === "estado" && onClearExternalFilter) {
-                        onClearExternalFilter();
-                    }
-                }}
+                onFilterChange={handleFilterChange}
                 onClearFilters={handleClearFilters}
                 sortDescriptor={sortDescriptor}
                 onSortChange={(d) => {
@@ -231,7 +263,7 @@ export default function NeverasTabla({
                     setPageSize(size);
                     setPage(1);
                 }}
-                isLoading={isLoading || isFetching}
+                isLoading={isLoading || isFetching || isLoadingPaginacion}
             />
         </div>
     );

@@ -1,5 +1,6 @@
 import { apiSlice } from "../../../app/apiSlice";
 import { API_NESTLE } from "../../../config/env";
+import type { PaginacionResponse , PaginationParams } from "../../../config/types";
 
 export interface DeviceItem {
     dis_id: number;
@@ -33,6 +34,13 @@ export interface NeveraResponse {
     data: DeviceItem[];
 }
 
+export interface PaginacionFilters {
+  _cod_nevera?: string;
+  _page?: number;
+  _size?: number;
+}
+
+
 
 export const deviceApi = apiSlice.injectEndpoints({
     endpoints: (builder) => ({
@@ -48,6 +56,17 @@ export const deviceApi = apiSlice.injectEndpoints({
                 },
             }),
         }),
+        getContadorRegistrosPaginas: builder.query<PaginacionResponse, NeveraFilters>({
+            query: (filters) => ({
+                url: `${API_NESTLE}/api/Consultas/contadorRegistrosPaginasDispositivosNeverasV2`,
+                method: "POST",
+                body: {
+                    _cod_nevera: filters._cod_nevera,
+                    _page: filters._page,
+                    _size: filters._size,
+                },
+            }),
+        }),
     }),
     overrideExisting: false,
 });
@@ -55,4 +74,7 @@ export const deviceApi = apiSlice.injectEndpoints({
 
 export const {
     useGetDeviceQuery,
+    useGetContadorRegistrosPaginasQuery,
 } = deviceApi;
+
+

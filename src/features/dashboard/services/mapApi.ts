@@ -1,5 +1,6 @@
 import { apiSlice } from "../../../app/apiSlice";
 import { API_NESTLE } from "../../../config/env";
+import type { PaginacionResponse , PaginationParams } from "../../../config/types";
 
 export interface ApiResponse<T> {
   status: boolean;
@@ -8,10 +9,25 @@ export interface ApiResponse<T> {
   data: T;
 }
 
-export interface PaginationParams {
+export interface PaginacionFilters {
+  cod_nevera?: string;
+  distribuidor?: string;
+  estado?: string;
+  imei?: string;
+  locacion?: string;
+  movimiento?: string;
+  or?: "asc" | "desc";
+  order?: string;
   page?: number;
   size?: number;
 }
+
+export interface DashboardContadoresFilters {
+  distribuidor?: string;
+  estado?: number;
+}
+
+
 export interface NeveraFilters {
   empresa?: string;
   tipo?: string;
@@ -86,6 +102,38 @@ export interface JasperReportItem {
   dateReceived: string;
   dateModified: string;
   dateDispositivo: string;
+}
+
+export interface EventoDistribuidor {
+  operativo_cartera: number;
+  operativo_censo: number;
+  operativo_instalacion: number;
+  taller: number;
+  estado_distribuidor: number;
+  fuera_de_zona: number;
+  desconexion_de_energia: number;
+  fuera_de_linea: number;
+  movimiento_fuera_de_zona: number;
+  detenido_fuera_de_zona: number;
+  traslado: number;
+  nestle: number;
+  mtto: number;
+}
+
+export interface RegionDistribuidores {
+  [distribuidor: string]: EventoDistribuidor;
+}
+
+export interface RegionesData {
+  regiones: {
+    [region: string]: RegionDistribuidores;
+  };
+}
+
+export interface EventosDashboardResponse {
+  status: boolean;
+  message: string;
+  data: RegionesData[];
 }
 
 export interface DashboardContadores {
@@ -163,10 +211,17 @@ export const mapApi = apiSlice.injectEndpoints({
         url: `${API_NESTLE}/api/Consultas/listaDistribuidoresBasicos`,
       }),
     }),
-    getDashboardContadores: builder.query<DashboardContadoresResponse, void>({
-      query: () => ({
-        url: `${API_NESTLE}/api/Consultas/nestleContadoresDashboardv2`,
-      }),
+    getDashboardContadores: builder.query<DashboardContadoresResponse, DashboardContadoresFilters>({
+      query: (filters = {}) => {
+        const params = new URLSearchParams();
+        if (filters.distribuidor) {
+          params.append('distribuidor', filters.distribuidor);
+        }
+        return {
+          url: `${API_NESTLE}/api/Consultas/nestleContadoresDashboardv2`,
+          params: params.toString() ? params : undefined,
+        };
+      },
     }),
     getDepartamentos: builder.query<DepartamentosResponse, void>({
       query: () => ({
@@ -192,6 +247,20 @@ export const mapApi = apiSlice.injectEndpoints({
           _order: filters.order ?? "dis_ult_conex",
           _page: filters.page ?? 1,
           _size: filters.size ?? 15,
+        },
+      }),
+    }),
+    getContadorRegistrosPaginas: builder.query<PaginacionResponse, PaginacionFilters>({
+      query: (filters) => ({
+        url: `${API_NESTLE}/api/Consultas/contadorRegistrosPaginaslistaGeneralNeverasDashboardV2`,
+        method: "POST",
+        body: {
+          _cod_nevera: filters.cod_nevera ?? "",
+          _distribuidor: filters.distribuidor ?? "",
+          _estado: filters.estado ?? "",
+          _imei: filters.imei ?? "",
+          _locacion: filters.locacion ?? "",
+          _movimiento: filters.movimiento ?? "",
         },
       }),
     }),
@@ -221,6 +290,11 @@ export const mapApi = apiSlice.injectEndpoints({
         },
       }),
     }),
+    getEventosDashboardPorDistribuidor: builder.query<EventosDashboardResponse, void>({
+      query: () => ({
+        url: `${API_NESTLE}/api/Consultas/eventosDashboardPorDistribuidor`,
+      }),
+    }),
   }),
   overrideExisting: false,
 });
@@ -235,4 +309,9 @@ export const {
   useGetNeverasDashboardQuery,
   useGetAlertasFallitasJasperReportQuery,
   useGetBitacoraJasperReportQuery,
+  useGetEventosDashboardPorDistribuidorQuery,
+  useGetContadorRegistrosPaginasQuery
 } = mapApi;
+
+
+

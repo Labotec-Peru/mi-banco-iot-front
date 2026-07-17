@@ -25,12 +25,13 @@ export const ESTADO_NEVERA_COLORS: Record<number, string> = {
   2: "#003595", // Cartera
   3: "#4E95D9", // Censo
   4: "#00A5E8", // Instalación
-  5: "#000000", // Taller
-  6: "#4B5563", // Distribuidor
-  7: "#D1D5DB", // Traslado
-  8: "#E5E7EB", // Nestlé
+  5: "#7F7F7F", // Taller
+  6: "#A7A7A7", // Distribuidor
+  7: "#FFD200", // Traslado
+  8: "#000000", // Nestlé
   9: "#9CA3AF", // Mantenimiento
 };
+
 
 export default function NeveraLayer({ map, neveras }: NeveraLayerProps) {
   useEffect(() => {
@@ -71,6 +72,7 @@ export default function NeveraLayer({ map, neveras }: NeveraLayerProps) {
             !isNaN(f.geometry.coordinates[1])
         ),
     };
+    
 
     if (!map.isStyleLoaded()) {
       map.once("idle", () => updateLayer());

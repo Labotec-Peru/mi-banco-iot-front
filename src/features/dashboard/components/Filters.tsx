@@ -13,7 +13,7 @@ import {
   PopoverTrigger,
   PopoverContent,
 } from "@heroui/react";
-import { Magnifer, Tuning2, StreetsMapPoint } from "@solar-icons/react";
+import { Magnifier, Tuning2, StreetsMapPoint, Signpost2, UserCheckRounded } from "@solar-icons/react";
 
 import {
   useGetDistribuidoresQuery,
@@ -125,6 +125,8 @@ export default function Filters({
                 <Select
                   size="sm"
                   label="Departamento"
+                  startContent={<Signpost2 className="text-gray-500" size={18} />}
+                  placeholder="Seleccione un departamento"
                   selectedKeys={
                     filters.departamento
                       ? new Set([filters.departamento])
@@ -146,6 +148,8 @@ export default function Filters({
 
                 <Select
                   size="sm"
+                  placeholder="Seleccione un distribuidor"
+                  startContent={<UserCheckRounded className="text-gray-500" size={18} />}
                   label="Distribuidor"
                   selectionMode="multiple"
                   selectedKeys={new Set(filters.distribuidor)}
@@ -189,7 +193,7 @@ export default function Filters({
               {isLoading ? (
                 <Spinner size="sm" color="primary" />
               ) : (
-                <Magnifer size={18} />
+                <Magnifier size={18} />
               )}
             </button>
           }

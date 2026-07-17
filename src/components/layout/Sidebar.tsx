@@ -34,25 +34,37 @@ export default function Sidebar() {
 
   return (
     <motion.aside
+      initial={{ width: isExpanded ? 288 : 70 }}
       animate={{ width: isExpanded ? 288 : 70 }}
       transition={{ type: "spring", stiffness: 300, damping: 30 }}
-      className="relative h-screen bg-[#1e187b] flex flex-col text-white shadow-2xl"
+      className="relative h-screen bg-[#1e187b] flex flex-col text-white shadow-2xl overflow-hidden"
     >
       <div
-        className={`pt-5 cursor-pointer flex ${isExpanded ? "pl-6 justify-start" : "justify-center"
-          }`}
+        className={`pt-5 cursor-pointer flex ${
+          isExpanded ? "pl-6 justify-start" : "justify-center"
+        }`}
         onClick={() => setIsExpanded(!isExpanded)}
       >
         <div className="flex items-center gap-1 mb-5 -mt-2">
-          <AnimatePresence>
+          <AnimatePresence mode="wait">
             {isExpanded ? (
-              <img
+              <motion.img
+                key="expanded"
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                transition={{ duration: 0.2 }}
                 src="/logoentel.png"
                 alt="Logo"
                 className="h-13"
               />
             ) : (
-              <img
+              <motion.img
+                key="collapsed"
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                transition={{ duration: 0.2 }}
                 src="/logosimple.png"
                 alt="Logo"
                 className="h-13"
@@ -62,7 +74,7 @@ export default function Sidebar() {
         </div>
       </div>
 
-      <nav className="flex-1 flex flex-col">
+      <nav className="flex-1 flex flex-col overflow-y-auto">
         {menu.map((item) => {
           const Icon = item.icon;
           const hasChildren = !!item.children?.length;
@@ -99,7 +111,7 @@ export default function Sidebar() {
                       setIsExpanded(true);
 
                       setTimeout(() => {
-                        setOpenMenus(prev => ({
+                        setOpenMenus((prev) => ({
                           ...prev,
                           [item.codigo]: true,
                         }));
@@ -107,18 +119,20 @@ export default function Sidebar() {
                       return;
                     }
 
-                    setOpenMenus(prev => ({
+                    setOpenMenus((prev) => ({
                       ...prev,
                       [item.codigo]: !prev[item.codigo],
                     }));
                   }}
-                  className={`relative flex items-center h-14 transition-colors duration-300 ${isExpanded
+                  className={`relative flex items-center h-14 transition-colors duration-300 ${
+                    isExpanded
                       ? "ml-4 rounded-l-[3rem]"
                       : "mx-auto w-14 justify-center rounded-xl"
-                    } ${isActive
+                  } ${
+                    isActive
                       ? "text-[#1e187b]"
                       : "text-[#ffffff80] hover:bg-white/5"
-                    }`}
+                  }`}
                 >
                   <Icon
                     weight="Bold"
@@ -147,23 +161,25 @@ export default function Sidebar() {
                   {isActive && (
                     <motion.div
                       layoutId="activeIndicator"
-                      className={`absolute inset-0 bg-white z-0 ${isExpanded
-                          ? "rounded-l-[3rem]"
-                          : "rounded-xl"
-                        }`}
+                      transition={{ duration: 0.2 }}
+                      className={`absolute inset-0 bg-white z-0 ${
+                        isExpanded ? "rounded-l-[3rem]" : "rounded-xl"
+                      }`}
                     />
                   )}
                 </button>
               ) : (
                 <NavLink
                   to={item.path}
-                  className={`relative flex items-center h-14 transition-colors duration-300 ${isExpanded
+                  className={`relative flex items-center h-14 transition-colors duration-300 ${
+                    isExpanded
                       ? "ml-4 rounded-l-[3rem]"
                       : "mx-auto w-14 justify-center rounded-xl"
-                    } ${isActive
+                  } ${
+                    isActive
                       ? "text-[#1e187b]"
                       : "text-[#ffffff80] hover:bg-white/5"
-                    }`}
+                  }`}
                 >
                   <Icon
                     weight="Bold"
@@ -180,47 +196,46 @@ export default function Sidebar() {
                   {isActive && (
                     <motion.div
                       layoutId="activeIndicator"
-                      className={`absolute inset-0 bg-white z-0 ${isExpanded
-                          ? "rounded-l-[3rem]"
-                          : "rounded-xl"
-                        }`}
+                      transition={{ duration: 0.2 }}
+                      className={`absolute inset-0 bg-white z-0 ${
+                        isExpanded ? "rounded-l-[3rem]" : "rounded-xl"
+                      }`}
                     />
                   )}
                 </NavLink>
               )}
 
               <AnimatePresence>
-                {hasChildren &&
-                  isExpanded &&
-                  openMenus[item.codigo] && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: "auto", opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.25 }}
-                      className="overflow-hidden"
-                    >
-                      {item.children!.map((child) => {
-                        const ChildIcon = child.icon;
+                {hasChildren && isExpanded && openMenus[item.codigo] && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.25 }}
+                    className="overflow-hidden"
+                  >
+                    {item.children!.map((child) => {
+                      const ChildIcon = child.icon;
 
-                        return (
-                          <NavLink
-                            key={child.path}
-                            to={child.path}
-                            className={({ isActive }) =>
-                              `ml-14 mr-3 h-10 flex items-center gap-3 rounded-lg px-3 text-sm transition-colors ${isActive
+                      return (
+                        <NavLink
+                          key={child.path}
+                          to={child.path}
+                          className={({ isActive }) =>
+                            `ml-14 mr-3 h-10 flex items-center gap-3 rounded-lg px-3 text-sm transition-colors ${
+                              isActive
                                 ? "bg-white/20 text-white"
                                 : "text-white/70 hover:bg-white/10 hover:text-white"
-                              }`
-                            }
-                          >
-                            <ChildIcon size={18} />
-                            <span>{child.name}</span>
-                          </NavLink>
-                        );
-                      })}
-                    </motion.div>
-                  )}
+                            }`
+                          }
+                        >
+                          <ChildIcon size={18} />
+                          <span>{child.name}</span>
+                        </NavLink>
+                      );
+                    })}
+                  </motion.div>
+                )}
               </AnimatePresence>
             </div>
           );
