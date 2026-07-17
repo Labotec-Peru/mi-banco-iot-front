@@ -1,6 +1,6 @@
 import { Card, CardBody, Spinner } from "@heroui/react";
 import { useGetNeveraDetalleQuery } from "../services/mapApi";
-import { UserRounded, BatteryFull, ClockCircle, CheckCircle, DangerTriangle, Globus, ShockAbsorber, WalkingRound, MapArrowUp, FaceScanSquare } from "@solar-icons/react"
+import { UserRounded, BatteryFull, ClockCircle, CheckCircle, DangerTriangle, Globus, ShockAbsorber, WalkingRound, MapArrowUp, FaceScanSquare, MenuDotsSquare } from "@solar-icons/react"
 
 interface Props {
   codigo: string;
@@ -92,10 +92,7 @@ export default function PopupLayer({ codigo }: Props) {
             )}
             {nevera.razon_social && (
               <Info label="Razón Social" value={nevera.razon_social} icon={<UserRounded />} />
-            )}
-            {nevera.codigo_cliente && (
-              <Info label="Código Cliente" value={nevera.codigo_cliente} icon={<FaceScanSquare />} />
-            )}
+            )}            
             {nevera.vendedor && (
               <Info label="Vendedor" value={nevera.vendedor} icon={<FaceScanSquare />} />
             )}
@@ -105,8 +102,11 @@ export default function PopupLayer({ codigo }: Props) {
             {nevera.distribuidor && (
               <Info label="Distribuidor" value={nevera.distribuidor} icon={<FaceScanSquare />} />
             )}
-            {nevera.codigo_nevera && (
-              <Info label="Código Nevera" value={nevera.codigo_nevera} icon={<UserRounded />} bold />
+            {nevera.cod_nevera && (
+              <Info label="Código Nevera" value={nevera.cod_nevera} icon={<UserRounded />} bold />
+            )}
+            {nevera.cod_cliente && (
+              <Info label="Código Cliente" value={nevera.cod_cliente} icon={<FaceScanSquare />} />
             )}
             {nevera.ubicacion && (
               <Info label="Ubicación" value={nevera.ubicacion} icon={<MapArrowUp />} />
@@ -114,11 +114,14 @@ export default function PopupLayer({ codigo }: Props) {
             {nevera.bateria && (
               <Info label="Batería" value={`${nevera.bateria}`} icon={<BatteryFull />} />
             )}
-            {nevera.ultima_conexion && (
-              <Info label="Última Conexión" value={nevera.ultima_conexion} icon={<ClockCircle />} />
+            {nevera.ultima_transmision && (
+              <Info label="Última Transmisión" value={nevera.ultima_transmision} icon={<ClockCircle />} />
             )}
             {nevera.dia_visita && (
               <Info label="Dia de Visita" value={nevera.dia_visita} icon={<ClockCircle />} />
+            )}
+            {nevera.numero_ticket_mtto && (
+              <Info label="Número de Ticket" value={nevera.numero_ticket_mtto} icon={<MenuDotsSquare />} />
             )}
             {nevera.status && (
               <Info
