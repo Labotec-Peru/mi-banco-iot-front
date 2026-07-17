@@ -2,7 +2,13 @@ import { Tab, Tabs } from "@heroui/react";
 import { PlugCircle, ServerMinimalistic, StreetsMapPoint } from "@solar-icons/react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Draggable from "react-draggable";
-import { useState } from "react";
+import { useState, type ComponentType, type ReactNode } from "react";
+
+const DraggableTabs = Draggable as unknown as ComponentType<{
+  children: ReactNode;
+  position: { x: number; y: number };
+  onStop: (event: MouseEvent, data: { x: number; y: number }) => void;
+}>;
 
 export default function DashboardTabs() {
   const navigate = useNavigate();
@@ -14,10 +20,9 @@ export default function DashboardTabs() {
     if (location.pathname === "/dashboard/neveras") return "congeladoras";
     if (location.pathname === "/dashboard/jasper") return "jasper";
     return "mapa";
-  })();
-
+  })(); 
   return (
-    <Draggable
+    <DraggableTabs
       position={position}
       onStop={(_, data) => {
         setPosition({ x: data.x, y: data.y });
@@ -79,6 +84,6 @@ export default function DashboardTabs() {
           </Tabs>
         </div>
       </div>
-    </Draggable>
+    </DraggableTabs>
   );
 }

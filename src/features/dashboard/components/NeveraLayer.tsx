@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import mapboxgl from "mapbox-gl";
-import type { Feature, Point } from "geojson";
+import type { Feature, GeoJsonProperties, Point } from "geojson";
 import { createRoot } from "react-dom/client";
 import { Provider } from "react-redux";
 import { store } from "../../../app/store";
@@ -50,7 +50,7 @@ export default function NeveraLayer({ map, neveras }: NeveraLayerProps) {
     const geojson: GeoJSON.FeatureCollection<GeoJSON.Point> = {
       type: "FeatureCollection",
       features: neveras
-        .map((nevera) => ({
+        .map((nevera): Feature<Point, GeoJsonProperties> => ({
           type: "Feature",
           properties: {
             codigo: nevera.cod_nevera,

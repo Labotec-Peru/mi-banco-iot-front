@@ -55,7 +55,7 @@ interface FiltersProps {
 }
 
 export default function Filters({
-  neveras,
+  neveras: _neveras,
   filters,
   onApply,
   setFilters,

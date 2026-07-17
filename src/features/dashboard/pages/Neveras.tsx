@@ -1,16 +1,15 @@
 // Neveras.tsx
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback } from "react";
 import PageContainer from "../../../layouts/PageContainer";
 import NeverasTabla from "../components/NeverasTabla";
 import GraphicsCountNeveras from "../components/GraphicsCountNeveras";
 import { useNeveraFilterContext } from "../contexts/NeveraFilterContext";
-import { Card, Tab, Tabs, CardBody } from "@heroui/react";
+import { Tab, Tabs } from "@heroui/react";
 import GraficoDistribuidor from "../components/GraficoDistribuidor";
 
 export default function Neveras() {
   const [activeFilter, setActiveFilter] = useState<string>("");
   const { clearAllFilters } = useNeveraFilterContext();
-  const [clearKey, setClearKey] = useState(0);
 
   const handleFilterByEstado = useCallback((estadoLabel: string) => {
     setActiveFilter(estadoLabel);
@@ -19,10 +18,9 @@ export default function Neveras() {
   const handleClearAllFilters = useCallback(() => {
     setActiveFilter("");
     clearAllFilters(); 
-    setClearKey(prev => prev + 1);
   }, [clearAllFilters]);
 
-  const handleDistribuidorClick = useCallback((distribuidor: string) => {
+  const handleDistribuidorClick = useCallback(() => {
     setActiveFilter(""); 
   }, []);
 

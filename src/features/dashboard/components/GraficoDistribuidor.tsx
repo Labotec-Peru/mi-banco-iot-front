@@ -13,7 +13,7 @@ import {
 } from "recharts";
 import { useGetEventosDashboardPorDistribuidorQuery } from "../services/mapApi";
 import { useNeveraFilterContext } from "../contexts/NeveraFilterContext";
-import { Spinner, Card, CardBody } from "@heroui/react";
+import { Card, CardBody } from "@heroui/react";
 import { Skeleton } from "@heroui/react";
 
 interface GraficoDistribuidorProps {

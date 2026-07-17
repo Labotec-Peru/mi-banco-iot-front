@@ -1,10 +1,16 @@
-import { useState, useRef } from "react";
+import { useState, useRef, type ComponentType, type Ref } from "react";
 import { useNavigate } from "react-router-dom";
 import { useLoginMutation } from "../../auth/services/authApi";
 import { Input, Button } from "@heroui/react";
 import { UserRounded, Lock, Eye, EyeClosed } from "@solar-icons/react";
 import ReCAPTCHA from "react-google-recaptcha";
 import { RECAPTCHA_TOKEN } from "../../../config/env";
+
+const ReCAPTCHAComponent = ReCAPTCHA as unknown as ComponentType<{
+  sitekey: string;
+  onChange: (token: string | null) => void;
+  ref?: Ref<unknown>;
+}>;
 
 export default function LoginForm() {
   const [login, { isLoading, error }] = useLoginMutation();
@@ -14,7 +20,7 @@ export default function LoginForm() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
-  const recaptchaRef = useRef<ReCAPTCHA | null>(null);
+  const recaptchaRef = useRef<unknown>(null);
 
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
 
@@ -89,7 +95,7 @@ export default function LoginForm() {
           }
         />
         <div className="">
-          <ReCAPTCHA
+          <ReCAPTCHAComponent
             ref={recaptchaRef}
             sitekey={RECAPTCHA_TOKEN}
             onChange={handleCaptchaChange}

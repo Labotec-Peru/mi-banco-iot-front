@@ -1,6 +1,6 @@
 import { apiSlice } from "../../../app/apiSlice";
 import { API_NESTLE } from "../../../config/env";
-import type { PaginacionResponse , PaginationParams } from "../../../config/types";
+import type { PaginacionResponse } from "../../../config/types";
 
 export interface DeviceItem {
     dis_id: number;

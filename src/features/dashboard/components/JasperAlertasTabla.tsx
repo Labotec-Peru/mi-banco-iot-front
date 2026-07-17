@@ -29,11 +29,7 @@ export default function JasperAlertasTabla() {
 
     const allDevices = data?.data ?? [];
 
-    const filteredDevices = useMemo(() => {
-        return allDevices.filter((device) => {
-            return true;
-        });
-    }, [allDevices]);
+    const filteredDevices = allDevices;
 
     const sortedDevices = useMemo(() => {
         return [...filteredDevices].sort((a, b) => {
