@@ -1,13 +1,16 @@
-import NeverasMapa from "../components/NeverasMapa";
-import { NeveraFilterProvider } from '../contexts/NeveraFilterContext';
+import DashboardHeader from "../components//DashboardHeader";
+import StatsRow from "../components/StatsRow";
+import BentoGrid from "../components/BentoGrid";
+import PageContainer from "../../../layouts/PageContainer";
+
 export default function Dashboard() {
   return (
-    <div className="flex flex-col gap-6 h-full bg-[#f8faff]">
-      <div className="w-full flex-1 relative">
-        <NeveraFilterProvider>
-          <NeverasMapa />
-        </NeveraFilterProvider>
+    <PageContainer>
+      <div className="flex flex-col gap-6 h-full overflow-y-auto">
+        <DashboardHeader userName="Jack" />
+        <StatsRow />
+        <BentoGrid />
       </div>
-    </div>
+    </PageContainer>
   );
 }

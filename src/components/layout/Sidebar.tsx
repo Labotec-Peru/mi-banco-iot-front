@@ -1,25 +1,79 @@
 import { useState, useEffect } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { AltArrowDown } from "@solar-icons/react";
-
-import { getSidebarOptions } from "../ux/sidebar-options";
+import {
+  AltArrowDown,
+  Bag4,
+  Box,
+  UserCircle,
+  ChartSquare,
+  SettingsMinimalistic,
+  MinusCircle,
+  Widget6,
+  HamburgerMenu,
+} from "@solar-icons/react";
+import { Button } from "@heroui/react";
 import { useSelector } from "react-redux";
+import ThemeToggle from "../ux/ThemeToggle";
+
+type SidebarItem = {
+  codigo: number;
+  name: string;
+  path: string;
+  icon: any;
+  badge?: number;
+  children?: SidebarItem[];
+};
+
+type SidebarSection = {
+  title: string;
+  items: SidebarItem[];
+};
+
+const SIDEBAR_SECTIONS: SidebarSection[] = [
+  {
+    title: "General",
+    items: [
+      { codigo: 1, name: "Inicio", path: "/dashboard", icon: Widget6 },
+      { codigo: 2, name: "Pedidos", path: "/sensores", icon: Bag4, badge: 2 },
+      { codigo: 3, name: "Productos", path: "/products", icon: Box },
+      { codigo: 4, name: "Clientes", path: "/customers", icon: UserCircle, badge: 4 },
+    ],
+  },
+  {
+    title: "Herramientas",
+    items: [
+      { codigo: 5, name: "Analíticas", path: "/analytics", icon: ChartSquare },
+      { codigo: 6, name: "Configuración", path: "/settings", icon: SettingsMinimalistic },
+    ],
+  },
+  {
+    title: "Administración",
+    items: [
+      {
+        codigo: 7,
+        name: "Usuarios",
+        path: "/users",
+        icon: UserCircle,
+        children: [
+          { codigo: 71, name: "Listado", path: "/users", icon: UserCircle },
+          { codigo: 72, name: "Roles", path: "/roles", icon: UserCircle },
+          { codigo: 73, name: "Permisos", path: "/permissions", icon: UserCircle },
+        ],
+      },
+    ],
+  },
+];
 
 export default function Sidebar() {
   const user = useSelector((state: any) => state.auth.user);
 
   const [openMenus, setOpenMenus] = useState<Record<number, boolean>>({});
-
-  const hiddenByUser: Record<string, number[]> = {
-    Nestle_Admin: [3],
-  };
-
-  const hidden = hiddenByUser[user?.username] ?? [];
-
-  const menu = getSidebarOptions(user?.opciones ?? []).filter(
-    (item) => !hidden.includes(item.codigo)
-  );
+  const [isMobile, setIsMobile] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return window.innerWidth < 768;
+  });
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
 
   const location = useLocation();
 
@@ -32,215 +86,280 @@ export default function Sidebar() {
     localStorage.setItem("sidebar-expanded", JSON.stringify(isExpanded));
   }, [isExpanded]);
 
+  useEffect(() => {
+    const handleResize = () => {
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
+      if (!mobile) setIsMobileOpen(false);
+    };
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  useEffect(() => {
+    setIsMobileOpen(false);
+  }, [location.pathname]);
+
+  const toggleSidebar = () => {
+    if (isMobile) {
+      setIsMobileOpen((prev) => !prev);
+      return;
+    }
+    setIsExpanded((prev: any) => !prev);
+  };
+
+  const isItemActive = (item: SidebarItem) => {
+    const currentPath = location.pathname;
+
+    if (item.path === "/dashboard") {
+      return currentPath === "/dashboard" || currentPath.startsWith("/dashboard/location");
+    }
+    if (item.children?.length) {
+      return item.children.some((c) => currentPath.startsWith(c.path));
+    }
+    const cleanPath = item.path.replace("/", "");
+    const singularKeyword = cleanPath.endsWith("s") ? cleanPath.slice(0, -1) : cleanPath;
+    return currentPath.includes(singularKeyword);
+  };
+
+  const isChildActive = (childPath: string) => location.pathname.startsWith(childPath);
+
+  const expanded = isExpanded || isMobile;
+
   return (
-    <motion.aside
-      initial={{ width: isExpanded ? 288 : 70 }}
-      animate={{ width: isExpanded ? 288 : 70 }}
-      transition={{ type: "spring", stiffness: 300, damping: 30 }}
-      className="relative h-screen bg-[#1e187b] flex flex-col text-white shadow-2xl overflow-hidden"
-    >
-      <div
-        className={`pt-5 cursor-pointer flex ${
-          isExpanded ? "pl-6 justify-start" : "justify-center"
-        }`}
-        onClick={() => setIsExpanded(!isExpanded)}
-      >
-        <div className="flex items-center gap-1 mb-5 -mt-2">
-          <AnimatePresence mode="wait">
-            {isExpanded ? (
-              <motion.img
-                key="expanded"
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.8 }}
-                transition={{ duration: 0.2 }}
-                src="/logoentel.png"
-                alt="Logo"
-                className="h-13"
-              />
-            ) : (
-              <motion.img
-                key="collapsed"
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.8 }}
-                transition={{ duration: 0.2 }}
-                src="/logosimple.png"
-                alt="Logo"
-                className="h-13"
-              />
-            )}
-          </AnimatePresence>
-        </div>
-      </div>
+    <>
+      {isMobile && !isMobileOpen && (
+        <Button
+          isIconOnly
+          color="primary"
+          className="fixed left-4 top-4 z-[120] md:hidden"
+          onPress={toggleSidebar}
+        >
+          <HamburgerMenu size={27} weight="Broken" />
+        </Button>
+      )}
 
-      <nav className="flex-1 flex flex-col overflow-y-auto">
-        {menu.map((item) => {
-          const Icon = item.icon;
-          const hasChildren = !!item.children?.length;
+      <AnimatePresence>
+        {isMobile && isMobileOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-[90] bg-black/45 backdrop-blur-sm md:hidden"
+            onClick={() => setIsMobileOpen(false)}
+          />
+        )}
+      </AnimatePresence>
 
-          const isActive = (() => {
-            const currentPath = location.pathname;
-
-            if (item.path === "/dashboard") {
-              return (
-                currentPath === "/dashboard" ||
-                currentPath.startsWith("/dashboard/location")
-              );
-            }
-
-            if (hasChildren) {
-              return currentPath.startsWith(item.path);
-            }
-
-            const cleanPath = item.path.replace("/", "");
-            const singularKeyword = cleanPath.endsWith("s")
-              ? cleanPath.slice(0, -1)
-              : cleanPath;
-
-            return currentPath.includes(singularKeyword);
-          })();
-
-          return (
-            <div key={item.codigo} className="flex flex-col">
-              {hasChildren ? (
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (!isExpanded) {
-                      setIsExpanded(true);
-
-                      setTimeout(() => {
-                        setOpenMenus((prev) => ({
-                          ...prev,
-                          [item.codigo]: true,
-                        }));
-                      }, 250);
-                      return;
-                    }
-
-                    setOpenMenus((prev) => ({
-                      ...prev,
-                      [item.codigo]: !prev[item.codigo],
-                    }));
-                  }}
-                  className={`relative flex items-center h-14 transition-colors duration-300 ${
-                    isExpanded
-                      ? "ml-4 rounded-l-[3rem]"
-                      : "mx-auto w-14 justify-center rounded-xl"
-                  } ${
-                    isActive
-                      ? "text-[#1e187b]"
-                      : "text-[#ffffff80] hover:bg-white/5"
-                  }`}
-                >
-                  <Icon
-                    weight="Bold"
-                    size={23}
-                    className={isExpanded ? "ml-7 z-10" : "z-10"}
-                  />
-
-                  {isExpanded && (
-                    <>
-                      <span className="ml-4 flex-1 text-left text-lg font-medium z-10">
-                        {item.name}
-                      </span>
-
-                      <motion.div
-                        animate={{
-                          rotate: openMenus[item.codigo] ? 180 : 0,
-                        }}
-                        transition={{ duration: 0.2 }}
-                        className="mr-5 z-10"
-                      >
-                        <AltArrowDown size={18} />
-                      </motion.div>
-                    </>
-                  )}
-
-                  {isActive && (
-                    <motion.div
-                      layoutId="activeIndicator"
-                      transition={{ duration: 0.2 }}
-                      className={`absolute inset-0 bg-white z-0 ${
-                        isExpanded ? "rounded-l-[3rem]" : "rounded-xl"
-                      }`}
-                    />
-                  )}
-                </button>
-              ) : (
-                <NavLink
-                  to={item.path}
-                  className={`relative flex items-center h-14 transition-colors duration-300 ${
-                    isExpanded
-                      ? "ml-4 rounded-l-[3rem]"
-                      : "mx-auto w-14 justify-center rounded-xl"
-                  } ${
-                    isActive
-                      ? "text-[#1e187b]"
-                      : "text-[#ffffff80] hover:bg-white/5"
-                  }`}
-                >
-                  <Icon
-                    weight="Bold"
-                    size={23}
-                    className={isExpanded ? "ml-7 z-10" : "z-10"}
-                  />
-
-                  {isExpanded && (
-                    <span className="ml-4 text-lg font-medium z-10">
-                      {item.name}
-                    </span>
-                  )}
-
-                  {isActive && (
-                    <motion.div
-                      layoutId="activeIndicator"
-                      transition={{ duration: 0.2 }}
-                      className={`absolute inset-0 bg-white z-0 ${
-                        isExpanded ? "rounded-l-[3rem]" : "rounded-xl"
-                      }`}
-                    />
-                  )}
-                </NavLink>
-              )}
-
+      {(!isMobile || isMobileOpen) && (
+        <motion.aside
+          initial={false}
+          animate={
+            isMobile
+              ? { x: isMobileOpen ? 0 : -320, opacity: 1 }
+              : { width: isExpanded ? 270 : 84 }
+          }
+          transition={{ type: "spring", stiffness: 300, damping: 30 }}
+          className={`fixed left-0 top-0 z-[50] h-screen bg-content1 flex flex-col shadow-xs overflow-hidden md:relative md:h-screen ${isMobile ? "w-[85vw] max-w-[300px]" : ""
+            }`}
+        >
+          <div className={`flex items-center h-20 shrink-0 ${expanded ? "px-5 justify-between" : "justify-center"}`}>
+            <div className="flex items-center overflow-hidden" onClick={toggleSidebar}>
+              <img src="/icologo.svg" alt="Logo" className={`${expanded ? "h-9" : "h-8"} shrink-0`} />
               <AnimatePresence>
-                {hasChildren && isExpanded && openMenus[item.codigo] && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: "auto", opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.25 }}
-                    className="overflow-hidden"
+                {expanded && (
+                  <motion.span
+                    initial={{ opacity: 0, x: -6 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -6 }}
+                    transition={{ duration: 0.15 }}
+                    className="font-bold text-lg text-foreground whitespace-nowrap"
                   >
-                    {item.children!.map((child) => {
-                      const ChildIcon = child.icon;
-
-                      return (
-                        <NavLink
-                          key={child.path}
-                          to={child.path}
-                          className={({ isActive }) =>
-                            `ml-14 mr-3 h-10 flex items-center gap-3 rounded-lg px-3 text-sm transition-colors ${
-                              isActive
-                                ? "bg-white/20 text-white"
-                                : "text-white/70 hover:bg-white/10 hover:text-white"
-                            }`
-                          }
-                        >
-                          <ChildIcon size={18} />
-                          <span>{child.name}</span>
-                        </NavLink>
-                      );
-                    })}
-                  </motion.div>
+                    <img src="/textlogo.svg" alt="Logo" className="h-14" />
+                  </motion.span>
                 )}
               </AnimatePresence>
             </div>
-          );
-        })}
-      </nav>
-    </motion.aside>
+          </div>
+
+         
+
+          <nav className="flex-1 flex flex-col overflow-y-auto pb-1">
+            {SIDEBAR_SECTIONS.map((section, sIdx) => (
+              <div
+                key={section.title}
+                className={`relative ${sIdx > 0
+                  ? "before:absolute before:top-0 before:left-0 before:w-full before:h-px before:bg-gradient-to-r before:from-transparent before:via-zinc-300 before:to-transparent"
+                  : ""
+                  }`}
+              >
+                  <p className="text-xs font-medium text-default-400 mb-2 mt-1 px-5 truncate dark:text-default-500">
+                    {section.title}
+                  </p>
+
+                {section.items.map((item) => {
+                  const Icon = item.icon;
+                  const hasChildren = !!item.children?.length;
+                  const active = isItemActive(item);
+                  const isOpen = !!openMenus[item.codigo];
+                  const showPill = hasChildren ? active && isOpen : active;
+
+                  return (
+                    <div key={item.codigo} className="flex flex-col mb-1">
+                      {hasChildren ? (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (isMobile) setIsMobileOpen(false);
+                            if (!isExpanded && !isMobile) {
+                              setIsExpanded(true);
+                              setTimeout(() => {
+                                setOpenMenus((prev) => ({ ...prev, [item.codigo]: true }));
+                              }, 250);
+                              return;
+                            }
+                            setOpenMenus((prev) => ({ ...prev, [item.codigo]: !prev[item.codigo] }));
+                          }}
+                          className={`relative flex items-center h-11 transition-colors duration-200 ${expanded ? "mx-3 px-3 rounded-full" : "mx-auto w-11 justify-center rounded-full"
+                            } ${showPill
+                              ? "text-background"
+                              : active
+                                ? "text-foreground font-semibold"
+                                : "text-default-500 hover:bg-default-100"
+                            }`}
+                        >
+                          {showPill && (
+                            <motion.div
+                              layoutId="sidebar-active-pill"
+                              transition={{ type: "spring", stiffness: 350, damping: 30 }}
+                              className="absolute inset-0 rounded-full bg-primary z-0"
+                            />
+                          )}
+
+                          <span className="relative z-10">
+                            <Icon weight="BoldDuotone" size={20} />
+                            {!expanded && item.badge ? (
+                              <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-primary" />
+                            ) : null}
+                          </span>
+
+                          {expanded && (
+                            <>
+                              <span className="relative z-10 ml-3 flex-1 text-left text-sm font-medium">
+                                {item.name}
+                              </span>
+                              <span className="relative z-10">
+                                {showPill ? (
+                                  <MinusCircle size={18} />
+                                ) : (
+                                  <motion.div
+                                    animate={{ rotate: isOpen ? 180 : 0 }}
+                                    transition={{ duration: 0.2 }}
+                                  >
+                                    <AltArrowDown size={16} />
+                                  </motion.div>
+                                )}
+                              </span>
+                            </>
+                          )}
+                        </button>
+                      ) : (
+                        <NavLink
+                          to={item.path}
+                          onClick={() => {
+                            if (isMobile) setIsMobileOpen(false);
+                          }}
+                          className={`relative flex items-center h-11 transition-colors duration-200 ${expanded ? "mx-3 px-3 rounded-full" : "mx-auto w-11 justify-center rounded-full"
+                            } ${active ? "text-background dark:text-foreground" : "text-default-500 hover:bg-default-100"}`}
+                        >
+                          {active && (
+                            <motion.div
+                              layoutId="sidebar-active-pill"
+                              transition={{ type: "spring", stiffness: 350, damping: 30 }}
+                              className="absolute inset-0 rounded-full bg-primary  z-0"
+                            />
+                          )}
+
+                          <span className="relative z-10">
+                            <Icon weight="BoldDuotone" size={20} />
+                            {!expanded && item.badge ? (
+                              <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-primary" />
+                            ) : null}
+                          </span>
+
+                          {expanded && (
+                            <span className="relative z-10 ml-3 flex-1 text-sm font-medium ">
+                              {item.name}
+                            </span>
+                          )}
+
+                          {expanded && item.badge ? (
+                            <span
+                              className={`relative z-10 ml-2 min-w-[22px] h-[22px] px-1.5 flex items-center justify-center rounded-full text-xs font-semibold ${active ? "bg-background text-foreground" : "bg-default-100 text-default-600"
+                                }`}
+                            >
+                              {item.badge}
+                            </span>
+                          ) : null}
+                        </NavLink>
+                      )}
+
+                      <AnimatePresence>
+                        {hasChildren && expanded && isOpen && (
+                          <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: "auto", opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            transition={{ duration: 0.25 }}
+                            className="overflow-hidden"
+                          >
+                            <div className="relative ml-8.5 mt-1 mb-1 pl-4 border-l border-default-200 [mask-image:linear-gradient(to_bottom,transparent_0%,black_20%,black_80%,transparent_100%)]">
+                              {item.children!.map((child) => {
+                                const ChildIcon = child.icon;
+                                const childActive = isChildActive(child.path);
+                                return (
+                                  <NavLink
+                                    key={child.path}
+                                    to={child.path}
+                                    onClick={() => {
+                                      if (isMobile) setIsMobileOpen(false);
+                                    }}
+                                    className="relative mr-3 mb-1 h-10 flex items-center gap-3 rounded-full px-3 text-sm transition-colors"
+                                  >
+                                    {childActive && (
+                                      <motion.div
+                                        layoutId="sidebar-active-child-pill"
+                                        transition={{ type: "spring", stiffness: 350, damping: 30 }}
+                                        className="absolute inset-0 rounded-full bg-background shadow-sm z-0"
+                                      />
+                                    )}
+                                    <span
+                                      className={`relative z-10 flex items-center gap-3 ${childActive
+                                        ? "text-foreground font-medium"
+                                        : "text-default-500 hover:text-foreground"
+                                        }`}
+                                    >
+                                      <ChildIcon size={16} />
+                                      {child.name}
+                                    </span>
+                                  </NavLink>
+                                );
+                              })}
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  );
+                })}
+              </div>
+            ))}
+          </nav>
+          <ThemeToggle user={user} expanded={expanded} />
+        </motion.aside>
+      )}
+    </>
   );
 }

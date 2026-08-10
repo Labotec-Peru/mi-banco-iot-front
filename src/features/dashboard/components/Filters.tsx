@@ -14,6 +14,7 @@ import {
   PopoverContent,
 } from "@heroui/react";
 import { Magnifier, Tuning2, StreetsMapPoint, Signpost2, UserCheckRounded } from "@solar-icons/react";
+import { ThinkingOrb } from 'thinking-orbs';
 
 import {
   useGetDistribuidoresQuery,
@@ -44,7 +45,7 @@ interface FiltersProps {
   setFilters: (filters: FiltersState) => void;
   onApply: () => void;
   isLoading: boolean;
-
+  showFilters?: boolean;
   showMapStyles?: boolean;
   mapStyle?: string;
   setMapStyle?: (value: string) => void;
@@ -61,6 +62,7 @@ export default function Filters({
   setFilters,
   isLoading,
   showMapStyles,
+  showFilters,
   mapStyle,
   setMapStyle,
   mapStyles,
@@ -79,8 +81,8 @@ export default function Filters({
   };
 
   return (
-    <div className="absolute top-20 right-3 z-20 max-w-xl">
-      <div className="flex items-center gap-2 bg-white rounded-full shadow-lg px-2 py-1.5 w-sm">
+    <div className="absolute top-2 right-2 z-20 max-w-xl">
+      <div className="flex items-center gap-2 bg-background/95 dark:bg-background/95 border border-default-200 dark:border-divider rounded-full shadow-lg px-2 py-1.5 w-xs">
         {showMapStyles && mapStyles && setMapStyle && mapStyle && (
           <Dropdown backdrop="blur">
             <DropdownTrigger>
@@ -88,7 +90,7 @@ export default function Filters({
                 variant="flat"
                 isIconOnly
                 size="sm"
-                className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-gray-100 text-gray-600 shrink-0"
+                className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-default-100 dark:hover:bg-default-800 text-default-600 dark:text-default-300 shrink-0"
               >
                 <StreetsMapPoint size={18} />
               </Button>
@@ -107,79 +109,80 @@ export default function Filters({
             </DropdownMenu>
           </Dropdown>
         )}
+        {showFilters && (
+          <Popover placement="bottom-start" size="sm" className="mt-2" >
+            <PopoverTrigger>
+              <Button
+                variant="flat"
+                isIconOnly
+                size="sm"
+                className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-default-100 dark:hover:bg-default-800 text-default-600 dark:text-default-300 shrink-0"
+              >
+                <Tuning2 size={18} />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-sm p-4 dark:bg-content2">
+              {() => (
+                <div className="flex flex-col gap-4 w-full">
+                  <Select
+                    size="sm"
+                    label="Departamento"
+                    startContent={<Signpost2 className="text-default-500 dark:text-default-300" size={18} />}
+                    placeholder="Seleccione un departamento"
+                    selectedKeys={
+                      filters.departamento
+                        ? new Set([filters.departamento])
+                        : new Set([])
+                    }
+                    onSelectionChange={(keys) =>
+                      setFilters({
+                        ...filters,
+                        departamento: String(Array.from(keys)[0] ?? ""),
+                      })
+                    }
+                  >
+                    {departamentos.map((d) => (
+                      <SelectItem key={d.departamento}>
+                        {d.departamento}
+                      </SelectItem>
+                    ))}
+                  </Select>
 
-        <Popover placement="bottom-start" size="sm" className="mt-2" >
-          <PopoverTrigger>
-            <Button
-              variant="flat"
-              isIconOnly
-              size="sm"
-              className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-gray-100 text-gray-600 shrink-0"
-            >
-              <Tuning2 size={18} />
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-sm p-4">
-            {() => (
-              <div className="flex flex-col gap-4 w-full">
-                <Select
-                  size="sm"
-                  label="Departamento"
-                  startContent={<Signpost2 className="text-gray-500" size={18} />}
-                  placeholder="Seleccione un departamento"
-                  selectedKeys={
-                    filters.departamento
-                      ? new Set([filters.departamento])
-                      : new Set([])
-                  }
-                  onSelectionChange={(keys) =>
-                    setFilters({
-                      ...filters,
-                      departamento: String(Array.from(keys)[0] ?? ""),
-                    })
-                  }
-                >
-                  {departamentos.map((d) => (
-                    <SelectItem key={d.departamento}>
-                      {d.departamento}
-                    </SelectItem>
-                  ))}
-                </Select>
+                  <Select
+                    size="sm"
+                    placeholder="Seleccione un distribuidor"
+                    startContent={<UserCheckRounded className="text-default-500 dark:text-default-300" size={18} />}
+                    label="Distribuidor"
+                    selectionMode="multiple"
+                    selectedKeys={new Set(filters.distribuidor)}
+                    onSelectionChange={(keys) =>
+                      setFilters({
+                        ...filters,
+                        distribuidor: Array.from(keys) as string[],
+                      })
+                    }
+                  >
+                    {distribuidores.map((d) => (
+                      <SelectItem key={d.nombre}>{d.nombre}</SelectItem>
+                    ))}
+                  </Select>
 
-                <Select
-                  size="sm"
-                  placeholder="Seleccione un distribuidor"
-                  startContent={<UserCheckRounded className="text-gray-500" size={18} />}
-                  label="Distribuidor"
-                  selectionMode="multiple"
-                  selectedKeys={new Set(filters.distribuidor)}
-                  onSelectionChange={(keys) =>
-                    setFilters({
-                      ...filters,
-                      distribuidor: Array.from(keys) as string[],
-                    })
-                  }
-                >
-                  {distribuidores.map((d) => (
-                    <SelectItem key={d.nombre}>{d.nombre}</SelectItem>
-                  ))}
-                </Select>
-
-                <Button
-                  color="primary"
-                  className="w-full"
-                  isLoading={isLoading}
-                  isDisabled={isLoading}
-                  onPress={() => {
-                    onApply();
-                  }}
-                >
-                  Aplicar filtros
-                </Button>
-              </div>
-            )}
-          </PopoverContent>
-        </Popover>
+                  <Button
+                    color="primary"
+                    className="w-full"
+                    isLoading={isLoading}
+                    isDisabled={isLoading}
+                    onPress={() => {
+                      onApply();
+                    }}
+                  >
+                    Aplicar filtros
+                  </Button>
+                </div>
+              )}
+            </PopoverContent>
+          </Popover>
+        )}
 
         <Input
           radius="full"
@@ -191,7 +194,7 @@ export default function Filters({
               className="flex items-center justify-center"
             >
               {isLoading ? (
-                <Spinner size="sm" color="primary" />
+                <ThinkingOrb state="solving" size={20} />
               ) : (
                 <Magnifier size={18} />
               )}

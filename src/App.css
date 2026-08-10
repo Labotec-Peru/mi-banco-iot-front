@@ -1,3 +1,6 @@
+@import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@300..700&display=swap');
+
+
 ::-webkit-scrollbar {
   width: 6px;  
   height: 1px; 
@@ -14,4 +17,10 @@
 
 ::-webkit-scrollbar-thumb:hover {
   background: #94a3b8; 
+}
+.escienza-font {
+  font-family: "Comfortaa", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 700;
+  font-style: normal;
 }

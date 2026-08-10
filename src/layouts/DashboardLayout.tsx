@@ -10,9 +10,8 @@ export default function DashboardLayout() {
     <NeveraFilterProvider>
       <div className="flex h-screen overflow-hidden">
         <Sidebar />
-       <DashboardTabs />
         <div className="flex flex-col flex-1 min-w-0 relative">
-          <Navbar />
+          {/* <Navbar /> */}
           <main className="flex-1 overflow-auto">
             <Outlet />
           </main>

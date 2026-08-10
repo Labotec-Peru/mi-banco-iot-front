@@ -1,18 +1,19 @@
 import { apiSlice } from "../../../app/apiSlice";
-import { loginAPI, type UserAPIType } from "./loginService";
+import { loginAPI, type LoginCredentials, type UserAPIType } from "./loginService";
 
 export const authApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
-    login: builder.mutation<UserAPIType, { username: string; clave: string }>({
-      async queryFn({ username, clave }) {
+    login: builder.mutation<UserAPIType, LoginCredentials>({
+      async queryFn({ email, password }) {
         try {
-          const userData = await loginAPI(username, clave);
+          const userData = await loginAPI(email, password);
           return { data: userData };
-        } catch (error: any) {
+        } catch (error) {
+          const message = error instanceof Error ? error.message : "Fallo en la autenticación";
           return {
             error: {
               status: "CUSTOM_ERROR",
-              error: error.message || "Fallo en la autenticación multi-tenant",
+              error: message,
             },
           };
         }

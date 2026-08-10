@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery, type BaseQueryApi, type FetchArgs } from '@reduxjs/toolkit/query/react';
 import { jwtDecode } from 'jwt-decode'; 
-import { API_ENTEL_CORE } from '../config/env';
+import { API } from '../config/env';
 import { logout } from '../features/auth/authSlice'; 
 
 interface JWTPayload {
@@ -8,7 +8,7 @@ interface JWTPayload {
 }
 
 const baseQuery = fetchBaseQuery({
-  baseUrl: API_ENTEL_CORE,
+  baseUrl: API,
   prepareHeaders: (headers) => {
     const token = localStorage.getItem('token');
     if (token) {

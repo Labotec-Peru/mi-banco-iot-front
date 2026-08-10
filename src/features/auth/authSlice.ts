@@ -1,70 +1,92 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import { authApi } from "./services/authApi";
-
-interface OpcionType {
-  codigo: number;
-  nombre: string;
-  ruta: string;
-}
-
-interface DistribuidorPermitido {
-  cod_distribuidor: number;
-  name_distribuidor: string;
-}
-
-export interface UserAPIType {
-  id: number;
-  username: string;
-  roles: string[];
-  opciones: OpcionType[];
-  accessToken: string;
-  tokenType: string;
-  distribuidoresPermitidos: DistribuidorPermitido[];
-}
+import type { UserAPIType } from "./services/loginService";
 
 interface AuthState {
-  user: Omit<UserAPIType, 'accessToken' | 'tokenType'> | null; 
+  user: Omit<UserAPIType, "accessToken" | "tokenType"> | null;
   token: string | null;
   isAuthenticated: boolean;
+  error: string | null;
 }
 
-const storedToken = localStorage.getItem("token");
-const storedUser = localStorage.getItem("user");
+const getStoredAuth = () => {
+  if (typeof window === "undefined") {
+    return { token: null, user: null, isAuthenticated: false };
+  }
+
+  const storedToken = localStorage.getItem("token");
+  const storedUser = localStorage.getItem("user");
+
+  return {
+    token: storedToken,
+    isAuthenticated: !!storedToken,
+    user: storedUser ? JSON.parse(storedUser) : null,
+  };
+};
+
+const persistAuth = (state: AuthState) => {
+  if (typeof window === "undefined") return;
+
+  if (state.token) {
+    localStorage.setItem("token", state.token);
+    localStorage.setItem("user", JSON.stringify(state.user));
+  } else {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+  }
+};
 
 const initialState: AuthState = {
-  token: storedToken,
-  isAuthenticated: !!storedToken,
-  user: storedUser ? JSON.parse(storedUser) : null, 
+  ...getStoredAuth(),
+  error: null,
 };
 
 const authSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {
+    clearAuthError: (state) => {
+      state.error = null;
+    },
     logout: (state) => {
       state.user = null;
       state.token = null;
       state.isAuthenticated = false;
-      localStorage.removeItem("token");
-      localStorage.removeItem("user"); 
+      state.error = null;
+      persistAuth(state);
+    },
+    setAuthError: (state, action: PayloadAction<string | null>) => {
+      state.error = action.payload;
     },
   },
   extraReducers: (builder) => {
-    builder.addMatcher(
-      authApi.endpoints.login.matchFulfilled,
-      (state, action) => {
+    builder
+      .addMatcher(authApi.endpoints.login.matchPending, (state) => {
+        state.error = null;
+      })
+      .addMatcher(authApi.endpoints.login.matchFulfilled, (state, action) => {
         const { accessToken, tokenType, ...restOfUser } = action.payload;
-        
+
         state.token = accessToken;
         state.isAuthenticated = true;
-        state.user = restOfUser; 
+        state.user = restOfUser;
+        state.error = null;
 
-        localStorage.setItem("token", accessToken);
-        localStorage.setItem("user", JSON.stringify(restOfUser)); 
-      }
-    );
+        persistAuth(state);
+      })
+      .addMatcher(authApi.endpoints.login.matchRejected, (state, action) => {
+        state.user = null;
+        state.token = null;
+        state.isAuthenticated = false;
+        state.error =
+          (action.payload as { error?: string } | undefined)?.error ??
+          action.error.message ??
+          "No se pudo iniciar sesión.";
+
+        persistAuth(state);
+      });
   },
 });
 
-export const { logout } = authSlice.actions;
+export const { clearAuthError, logout, setAuthError } = authSlice.actions;
 export default authSlice.reducer;

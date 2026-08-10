@@ -1,4 +1,3 @@
-// NeverasMapa.tsx
 import { useState, useEffect } from "react";
 import Map from "./Map";
 import Filters from "./Filters";
@@ -7,6 +6,8 @@ import { Spinner } from "@heroui/react";
 import MAP_STYLES from "../styles/MAP_STYLES";
 import { ESTADOS_NEVERA } from "../services/estadoNeveraConstants";
 import { useNeveraFilterContext } from "../contexts/NeveraFilterContext";
+import { useSyncMapTheme } from "../../../hooks/useSyncMapTheme";
+import { ThinkingOrb } from "thinking-orbs";
 
 export default function NeverasMapa() {
   const {
@@ -25,6 +26,8 @@ export default function NeverasMapa() {
     departamento: "",
   });
   const [apiFilters, setApiFilters] = useState(filters);
+
+  const { mapStyle, setMapStyle } = useSyncMapTheme();
 
   useEffect(() => {
     if (apiFilters.distribuidor.length > 0) {
@@ -58,14 +61,16 @@ export default function NeverasMapa() {
   });
   const talleres = talleresData?.data ?? [];
 
-  const [mapStyle, setMapStyle] = useState(
-    () => localStorage.getItem("map-style") ?? MAP_STYLES[0].value
-  );
+  // ❌ ELIMINA estas líneas (están duplicadas)
+  // const [mapStyle, setMapStyle] = useState(
+  //   () => localStorage.getItem("map-style") ?? MAP_STYLES[0].value
+  // );
 
-  const handleSetMapStyle = (value: string) => {
-    setMapStyle(value);
-    localStorage.setItem("map-style", value);
-  };
+  // ❌ ELIMINA esta función (ya no es necesaria)
+  // const handleSetMapStyle = (value: string) => {
+  //   setMapStyle(value);
+  //   localStorage.setItem("map-style", value);
+  // };
 
   const {
     data,
@@ -110,19 +115,18 @@ export default function NeverasMapa() {
 
   const neveras = data?.data ?? [];
 
-  if (error) return <div>Error al cargar las neveras.</div>;
-
   return (
-    <div className="relative w-full h-screen">
+    <div className="relative w-full h-full">
       <Filters
         filters={filters}
         setFilters={setFilters}
         onApply={aplicarFiltros}
         isLoading={isFetching}
         neveras={neveras}
-        showMapStyles
         mapStyle={mapStyle}
-        setMapStyle={handleSetMapStyle}
+        showMapStyles={true}
+        showFilters={false}        
+        setMapStyle={setMapStyle}
         mapStyles={MAP_STYLES}
       />
 
@@ -131,19 +135,22 @@ export default function NeverasMapa() {
         mapStyle={mapStyle}
         talleres={talleres}
         onFilterFromChart={handleFilterFromChart}
-       onClearFilters={handleClearAllFiltersFromDashboard}
+        onClearFilters={handleClearAllFiltersFromDashboard}
       />
 
       {(isLoading) && (
         <div className="absolute inset-0 z-1 flex items-center justify-center bg-black/20 backdrop-blur-sm">
           <div className="px-8 py-6 flex flex-col items-center gap-4">
-            <Spinner size="lg" color="primary" />
+            <ThinkingOrb state="solving" size={64} />
             <span className="text-sm font-medium text-white">
-              Cargando neveras...
+              Cargando ...
             </span>
           </div>
         </div>
       )}
+      <div className="absolute bottom-4 right-4 z-10">
+        {error && <div>Error al cargar.</div>}
+      </div>
     </div>
   );
 }

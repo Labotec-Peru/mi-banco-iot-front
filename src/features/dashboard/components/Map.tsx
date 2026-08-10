@@ -81,14 +81,14 @@ export default function Map({
   }, [mapStyle]);
 
   return (
-    <div className="relative w-full h-full min-h-125">
-      <div className="absolute top-19 left-2 z-10 h-[88vh] overflow-auto">
+    <div className="relative w-full h-full ">
+      {/* <div className="absolute top-19 left-2 z-10 h-[88vh] overflow-auto">
         <GraphicsCountNeveras 
           layout="sidebar" 
           onFilterByEstado={onFilterFromChart}
           onClearFilters={onClearFilters}
         />
-      </div>
+      </div> */}
       
       <div ref={mapContainerRef} className="w-full h-full" />
 

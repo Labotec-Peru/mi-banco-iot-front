@@ -1,10 +1,4 @@
-import { 
-  API_ENTEL_CORE, 
-  API_NESTLE, 
-  API_MEGALAB, 
-  API_ALMACENES, 
-  API_CONDOMINIOS 
-} from "../../../config/env";
+﻿import { API } from "../../../config/env";
 
 interface OpcionType {
   codigo: number;
@@ -23,131 +17,61 @@ export interface UserAPIType {
   roles: string[];
   opciones: OpcionType[];
   accessToken: string;
+  refreshToken: string;
+  expiration: number;
   tokenType: string;
   distribuidoresPermitidos: DistribuidorPermitido[];
 }
 
-type LoginAPIType = UserAPIType & {
-  message: string;
-};
+export interface LoginCredentials {
+  email: string;
+  password: string;
+}
 
-export const loginAPI = async (nombreUsuario: string, clave: string): Promise<UserAPIType> => {
-  let response: LoginAPIType | null = null;
-  const urlEncodedBody = new URLSearchParams({ nombreUsuario, clave }).toString();
+export const loginAPI = async (
+  email: string,
+  password: string
+): Promise<UserAPIType> => {
+  if (!API) {
+    throw new Error("No hay una URL de autenticación configurada.");
+  }
 
-  const formHeaders = {
-    Accept: "application/json",
-    "Content-Type": "application/x-www-form-urlencoded",
+  const response = await fetch(`${API}/api/v1/auth/login`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      email,
+      password,
+    }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+
+    throw new Error(
+      errorData?.message ||
+      errorData?.error ||
+      "Credenciales incorrectas o servicio no disponible."
+    );
+  }
+
+  const data = await response.json();
+
+  if (!data?.token) {
+    throw new Error("No se recibió el token de autenticación.");
+  }
+
+  return {
+    id: data.id ?? 0,
+    username: data.username ?? "",
+    roles: data.roles ?? [],
+    opciones: data.opciones ?? [],
+    distribuidoresPermitidos: data.distribuidoresPermitidos ?? [],
+    accessToken: data.token,
+    refreshToken: data.refresh_token,
+    expiration: data.expiration,
+    tokenType: "Bearer",
   };
-
-  try {
-    const res1 = await fetch(`${API_ENTEL_CORE}/Auth`, {
-      method: "POST",
-      headers: formHeaders,
-      body: urlEncodedBody,
-    });
-
-    if (res1.ok) {
-      response = await res1.json();
-    }
-
-    if (response && response.message === "OK") {
-      
-      if (response.id === 9) {
-        const res2 = await fetch(`${API_NESTLE}/Auth`, {
-          method: "POST",
-          headers: formHeaders,
-          body: urlEncodedBody,
-        });
-
-        if (!res2.ok) throw new Error("Error de comunicación con la API de Nestlé");
-        const data2 = await res2.json();
-
-        if (!data2 || !data2.accessToken) {
-          throw new Error("Autorización denegada por el servicio de Nestlé");
-        }
-
-        response = {
-          ...response,
-          accessToken: data2.accessToken,
-          tokenType: data2.tokenType ?? "Bearer",
-          distribuidoresPermitidos: data2.distribuidoresPermitidos ?? [],
-        };
-      }
-      else if (response.id === 11) {
-        const res2 = await fetch(`${API_MEGALAB}/Auth`, {
-          method: "POST",
-          headers: formHeaders,
-          body: urlEncodedBody,
-        });
-
-        if (!res2.ok) throw new Error("Error de comunicación con la API de Megalab");
-        const data2 = await res2.json();
-
-        response.accessToken = data2.accessToken;
-      }
-      else if (response.id === 12) {
-        const res2 = await fetch(`${API_ALMACENES}/Auth`, {
-          method: "POST",
-          headers: formHeaders,
-          body: urlEncodedBody,
-        });
-
-        if (!res2.ok) throw new Error("Error de comunicación con el módulo de Almacenes");
-        const data2 = await res2.json();
-
-        response.accessToken = data2.token ?? data2.accessToken;
-      }
-    } else {
-      response = null;
-    }
-
-  } catch (error: any) {
-    console.warn("Fallo en la ruta principal de autenticación, intentando contingencia...", error.message);
-    response = null; 
-  }
-
-  if (!response || !response.accessToken) {
-    try {
-      const res2 = await fetch(`${API_CONDOMINIOS}/auth/login`, {
-        method: "POST",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: nombreUsuario,
-          password: clave,
-        }),
-      });
-
-      if (!res2.ok) {
-        const errData = await res2.json().catch(() => ({}));
-        throw new Error(errData.message || `Error en contingencia: ${res2.status}`);
-      }
-
-      const data2: { token: string } = await res2.json();
-
-      response = {
-        id: 0,
-        username: nombreUsuario,
-        roles: [],
-        opciones: [],
-        accessToken: data2.token,
-        tokenType: "Bearer",
-        message: "OK",
-        distribuidoresPermitidos: [],
-      };
-    } catch (fallbackError: any) {
-      throw new Error(fallbackError.message || "No se pudo conectar con ningún servicio de autenticación.");
-    }
-  }
-
-  const { message, ...user } = response;
-
-  if (message !== "OK") {
-    throw new Error("Estructura de autenticación corrupta.");
-  }
-
-  return user;
 };

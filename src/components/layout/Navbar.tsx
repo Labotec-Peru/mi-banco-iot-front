@@ -1,9 +1,10 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { logout } from "../../features/auth/authSlice";
 
-import { Logout3 } from "@solar-icons/react";
+import { Logout3, Magnifer, BellBing } from "@solar-icons/react";
+import { Input } from "@heroui/react";
 
 const routeInfoMap = [
   {
@@ -53,6 +54,8 @@ const routeInfoMap = [
   },
 ];
 
+const UNREAD_ALERTS_COUNT = 3;
+
 export default function Navbar() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -70,53 +73,87 @@ export default function Navbar() {
     );
   }, [location.pathname]);
 
+  const [search, setSearch] = useState("");
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const query = search.trim();
+    if (!query) return;
+    navigate(`/${encodeURIComponent(query)}`);
+  };
+
   const handleSignOut = () => {
     dispatch(logout());
     navigate("/login");
   };
 
   return (
-    <div className="w-full absolute top-0 z-40">
-      <header
-        className="flex items-center justify-between h-[70px] px-10 py-2
-        bg-[#1e187b]"
+    <header
+      className="w-full sticky top-0 z-40 flex items-center justify-between gap-6
+      h-[72px] bg-transparent px-8 bg-background/80 backdrop-blur-md border-b border-divider border-zinc-100 dark:border-zinc-800"
+    >
+      <form
+        onSubmit={handleSearchSubmit}
+        className="hidden md:flex flex-1 max-w-md"
       >
-        <div className="flex flex-col">
-          <h1 className="text-2xl font-black text-white transition-all duration-300">
-            {pageMeta.title}
-          </h1>
-          <p className="text-sm text-white/80 transition-all duration-300">
-            {pageMeta.subtitle}
-          </p>
+        <div className="relative w-full group">         
+          <Input  
+            type="text"
+            value={search}
+            radius="full"
+            size="md"
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Buscar dispositivos, clientes, comandos..."        
+            startContent={<Magnifer size={18} className="text-default-400" />}   
+          />
         </div>
+      </form>
 
-        <div className="flex items-center gap-6">
-          <div className="flex items-center gap-3 pl-4 border-l border-white/20">
-            <div className="w-11 h-11 rounded-full bg-[#1e187b] border border-white/30 shadow overflow-hidden">
-              <img
-                src={`https://ui-avatars.com/api/?name=${user?.username || "A"}&background=1e187b&color=fff&size=128&rounded=true&border=fff&bold=true`}
-                alt="Avatar"
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <div className="text-left">
-              <p className="text-sm font-bold text-white">
-                {user?.username || "Usuario IoT"}
-              </p>
-            </div>
+      <div className="flex items-center gap-3 shrink-0">
+        <button
+          onClick={() => navigate("/alerts")}
+          aria-label="Ver alertas"
+          className="relative p-2.5 rounded-full text-default-500 hover:bg-default-100 hover:text-foreground transition-colors"
+        >
+          <BellBing size={20} />
+          {UNREAD_ALERTS_COUNT > 0 && (
+            <span
+              className="absolute top-1.5 right-1.5 min-w-[16px] h-[16px] px-[3px]
+              flex items-center justify-center rounded-full bg-danger text-white
+              text-[10px] font-semibold leading-none"
+            >
+              {UNREAD_ALERTS_COUNT > 9 ? "9+" : UNREAD_ALERTS_COUNT}
+            </span>
+          )}
+        </button>
+
+        <div className="flex items-center gap-3 pl-3 border-l border-divider">
+          <div className="w-10 h-10 rounded-full border border-divider shadow-sm overflow-hidden shrink-0">
+            <img
+              src={`https://ui-avatars.com/api/?name=${user?.username || "A"}&background=0f1bca&color=fff&size=128&rounded=true&bold=true`}
+              alt="Avatar"
+              className="w-full h-full object-cover"
+            />
           </div>
-
-          <button
-            onClick={handleSignOut}
-            aria-label="Cerrar sesión"
-            className="p-2.5 rounded-xl transition-all
-            bg-red-500/10 text-red-500
-            hover:bg-red-500/20 backdrop-blur-md"
-          >
-            <Logout3 className="w-5 h-5" />
-          </button>
+          <div className="text-left hidden lg:block">
+            <p className="text-sm font-semibold text-foreground leading-none">
+              {user?.username || "Usuario IoT"}
+            </p>
+            <p className="text-xs text-default-400 mt-0.5">
+              {user?.rol || "Operador"}
+            </p>
+          </div>
         </div>
-      </header>
-    </div>
+
+        <button
+          onClick={handleSignOut}
+          aria-label="Cerrar sesión"
+          className="p-2.5 rounded-full transition-colors
+          bg-danger/10 text-danger hover:bg-danger/20"
+        >
+          <Logout3 className="w-5 h-5" />
+        </button>
+      </div>
+    </header>
   );
 }
