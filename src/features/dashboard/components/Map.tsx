@@ -3,7 +3,7 @@ import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import NeveraLayer from "./NeveraLayer";
 import { MAPBOX_API_KEY } from "../../../config/env";
-import GraphicsCountNeveras from "./GraphicsCountNeveras";
+
 import TallerLayer from "./TallerLayer";
 
 interface Nevera {
@@ -34,12 +34,10 @@ interface MapProps {
   onClearFilters?: () => void;
 }
 
-export default function Map({ 
-  neveras, 
-  talleres, 
-  mapStyle, 
-  onFilterFromChart,
-  onClearFilters
+export default function Map({
+  neveras,
+  talleres,
+  mapStyle
 }: MapProps) {
   const mapContainerRef = useRef<HTMLDivElement>(null!);
   const mapRef = useRef<mapboxgl.Map | null>(null);
@@ -81,15 +79,7 @@ export default function Map({
   }, [mapStyle]);
 
   return (
-    <div className="relative w-full h-full ">
-      {/* <div className="absolute top-19 left-2 z-10 h-[88vh] overflow-auto">
-        <GraphicsCountNeveras 
-          layout="sidebar" 
-          onFilterByEstado={onFilterFromChart}
-          onClearFilters={onClearFilters}
-        />
-      </div> */}
-      
+    <div className="relative w-full h-full rounded-2xl  overflow-hidden">
       <div ref={mapContainerRef} className="w-full h-full" />
 
       {ready && mapRef.current && (

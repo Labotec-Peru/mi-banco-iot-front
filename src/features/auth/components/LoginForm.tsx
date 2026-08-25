@@ -4,10 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { useLoginMutation } from "../../auth/services/authApi";
 import { clearAuthError, setAuthError } from "../authSlice";
 import { Input, Button } from "@heroui/react";
-import { DownloadSquare, Eye, EyeClosed, Letter, Lock, UserRounded } from "@solar-icons/react";
+import { DownloadSquare, Eye, EyeClosed, Letter, Lock } from "@solar-icons/react";
 import { motion, useMotionTemplate, useMotionValue } from "framer-motion";
-import { LiquidBackground } from "./LiquidBackground";
-import { useGoogleLogin } from '@react-oauth/google';
 import { GoogleLogin } from '@react-oauth/google';
 import { ThinkingOrb } from "thinking-orbs";
 
@@ -127,10 +125,9 @@ export default function LoginForm() {
 
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
-  const [isHovered, setIsHovered] = useState(false);
 
   useEffect(() => {
-    const handleBlur = () => setIsHovered(true);
+    const handleBlur = () => {};
     window.addEventListener("blur", handleBlur);
 
     return () => window.removeEventListener("blur", handleBlur);
@@ -140,12 +137,11 @@ export default function LoginForm() {
     const { left, top } = currentTarget.getBoundingClientRect();
     mouseX.set(clientX - left);
     mouseY.set(clientY - top);
-    setIsHovered(true);
   }
 
   return (
     <motion.div
-      className="w-screen h-screen min-h-screen bg-[#F8FAFC] flex flex-col md:flex-row overflow-hidden font-sans justify-center items-center md:items-stretch  relative"
+      className="w-screen h-screen min-h-screen  flex flex-col md:flex-row overflow-hidden font-sans justify-center items-center md:items-stretch  relative"
       variants={containerVariants}
       initial="hidden"
       animate="visible"
@@ -154,14 +150,11 @@ export default function LoginForm() {
         className="group relative hidden md:flex w-full text-white p-8 lg:p-12 flex-col justify-between overflow-hidden shadow-2xl z-10 select-none"
         variants={leftPanelVariants}
         onMouseMove={handleMouseMove}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(true)}
       >
-        <div className="absolute inset-0 bg-[#0a0a12] z-0" />
+        <div className="absolute inset-0 bg-[#080808] z-0" />
 
-        <div className="absolute inset-0 z-0 bg-cover bg-center opacity-30 mix-blend-luminosity pointer-events-none" style={{ backgroundImage: "url('/bg-grifo.jpg')" }} />
+        <div className="absolute inset-0 z-0 bg-cover bg-center opacity-70 hue-rotate-15" style={{ backgroundImage: "url('/bannerMedidores.jpg')" }} />
 
-        <LiquidBackground mouseX={mouseX} mouseY={mouseY} isHovered={isHovered} />
 
 
         <div className="absolute top-1/2 -right-32 w-96 h-96 bg-secondary/15 rounded-full blur-[130px] pointer-events-none" />
@@ -201,20 +194,20 @@ export default function LoginForm() {
         </svg>
 
         <div className="flex items-center justify-between z-20">
-          <img src="/logoEscienzaWhite.png" alt="Escienza" className="h-10 opacity-80" />
+          <img src="/icologoSVGwhite.svg" alt="Escienza" className="h-12 opacity-80" />
         </div>
 
         <div className="my-auto py-6 z-20 max-w-xl">
-          <span className="inline-block text-xs font-semibold uppercase tracking-[0.2em] text-secondary/90 mb-3 escienza-font">
+          <span className="inline-block text-xs font-semibold uppercase tracking-[0.2em] text-secondary/90 mb-3">
             Sistema de Control Volumétrico
           </span>
 
           <h1 className="text-2xl lg:text-5xl font-black tracking-tight leading-[1.15] uppercase mb-4 text-white drop-shadow-md">
-            Gestión de flujo que genera certeza:{" "}
-            <span className="text-secondary">cero mermas, control absoluto.</span>
+            Eficiencia hídrica que genera valor:{" "}
+            <span >menos costos, menor huella.</span>
           </h1>
 
-          <p className="text-sm text-white/70 font- leading-relaxed max-w-md">
+          <p className="text-sm text-white/70 font- leading-relaxed max-w-md ">
             Accede al panel para monitorear telemetría, grifos e inventario de volumen en tiempo real.
           </p>
         </div>
@@ -225,7 +218,7 @@ export default function LoginForm() {
             <span className="text-secondary/80 hover:underline cursor-pointer">
               Labotec
             </span>{" "}
-            — Proyecto Grifo
+            — Proyecto Mi banco
           </p>
           <span className="text-[10px] uppercase tracking-widest text-white/30">
             v1.0
@@ -234,12 +227,12 @@ export default function LoginForm() {
       </motion.div>
 
       <motion.div
-        className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-[#F8FAFC] dark:bg-[#0a0a12] relative z-10"
+        className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-background dark:bg-background relative z-10"
         variants={rightPanelVariants}
       >
         <div className="w-full max-w-md sm:max-w-sm lg:max-w-md">
           <motion.div className="mb-8" variants={itemVariants}>
-            <img src="/logoEscienza.svg" alt="Escienza" className="h-13 mb-6" />
+            <img src="/mibancoSVG.svg" alt="Escienza" className="h-20 mb-6" />
             <h2 className="text-2xl font-bold text-slate-900 tracking-tight dark:text-white">
               Ingrese sus Credenciales
             </h2>
@@ -251,6 +244,7 @@ export default function LoginForm() {
           <motion.form onSubmit={handleSubmit} className="space-y-4" variants={itemVariants}>
             <motion.div variants={itemVariants}>
               <Input
+                radius="full"
                 startContent={
                   <Letter weight="BoldDuotone" className="text-lg text-slate-400 pointer-events-none shrink-0" />
                 }
@@ -262,14 +256,15 @@ export default function LoginForm() {
                 }}
                 label="Email"
                 placeholder="user@gmail.com"
-                required
-                variant="flat"
+                required                
+                variant="underlined"
               />
             </motion.div>
 
             <motion.div variants={itemVariants}>
               <div className="relative">
                 <Input
+                  radius="full"
                   startContent={
                     <Lock weight="BoldDuotone" className="text-lg text-slate-400 pointer-events-none shrink-0" />
                   }
@@ -282,7 +277,7 @@ export default function LoginForm() {
                   label="Contraseña"
                   placeholder="Ingrese su contraseña"
                   required
-                  variant="flat"
+                  variant="underlined"
                 />
                 <button
                   type="button"
@@ -319,8 +314,8 @@ export default function LoginForm() {
               color="primary"
               className="w-full h-11 rounded-full flex items-center justify-center gap-2.5 text-sm font-medium transition-colors"
             >
-              {isLoading ? (                
-                <ThinkingOrb state="solving" size={20} />
+              {isLoading ? (
+                <ThinkingOrb state="composing" size={20} />
               ) : (
                 <>
                   <DownloadSquare weight="BoldDuotone" className="text-xl text-white pointer-events-none shrink-0" />

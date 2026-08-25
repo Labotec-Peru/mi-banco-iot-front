@@ -1,10 +1,12 @@
 import PageContainer from "../../../layouts/PageContainer";
-import DeviceTabla from "../components/DeviceTabla";
+import StatsRow from "../../dashboard/components/StatsRow";
+import SeriesTabla from "../components/SeriesTabla";
 
 export default function Devices() {
   return (
     <PageContainer>
-      <DeviceTabla />
+      <StatsRow />      
+      <SeriesTabla />
     </PageContainer>
   );
 }

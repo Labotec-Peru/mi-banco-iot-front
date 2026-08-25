@@ -43,7 +43,7 @@ const ThemeToggle = ({ user, expanded }: ThemeToggleProps) => {
 
   const avatarSrc =
     user?.avatarUrl ??
-    `https://ui-avatars.com/api/?name=${user?.username || "U"}&background=0f1bca&color=fff&size=128&rounded=true&bold=true`;
+    `https://ui-avatars.com/api/?name=${user?.username || "U"}&background=primary&color=fff&size=128&rounded=true&bold=true`;
 
   return (
     <div className={`shrink-0 ${expanded ? "px-5" : "px-3"} pb-4`}>

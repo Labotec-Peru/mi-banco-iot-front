@@ -1,49 +1,93 @@
 import StatCard from "./StatCard";
-import { GasStation, ChartSquare, WiFiRouterMinimalistic, Accumulator } from "@solar-icons/react";
+import {
+  WiFiRouterMinimalistic,
+  Danger,
+  RoundAltArrowRight,
+  Water,
+} from "@solar-icons/react";
 
 export default function StatsRow() {
+  const deviceStatusData = [
+    { name: "Online", value: 124, fill: "#22c55e" },
+    { name: "Advertencia", value: 26, fill: "#eab308" },
+    { name: "Con alerta", value: 10, fill: "#ef4444" },
+    { name: "Offline", value: 0, fill: "#6b7280" },
+  ];
+
+  const alertStatusData = [
+    { name: "Críticas", value: 2, fill: "#ef4444" },
+    { name: "Advertencia", value: 4, fill: "#eab308" },
+    { name: "Informativas", value: 8, fill: "#3b82f6" },
+  ];
+
+  const connectivityData = [
+    { name: "4G", value: 45, fill: "#22c55e" },
+    { name: "3G", value: 28, fill: "#eab308" },
+    { name: "2G", value: 12, fill: "#f97316" },
+    { name: "Sin señal", value: 5, fill: "#ef4444" },
+  ];
+
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
       <StatCard
-        title="Nivel Total Combustible"
-        icon={<GasStation size={18} weight="BoldDuotone"/>}
+        title="Flujo Máximo"
+        icon={<Water size={18} weight="BoldDuotone" />}
         accent="primary"
         value="78.5%"
         variant="progress"
         progress={78.5}
-        progressLabel="3,925L"
-        trend="up"
-        caption="↑ 2.3% en la última hora"
+        progressLabel="40,925L"
+        caption="Mibanco - Huaycán"
+        extraInfo={[
+          { label: "Promedio", value: "62.3 L/min", color: "text-primary" },
+          { label: "Pico", value: "89.2 L/min", color: "text-success" },
+        ]}
       />
 
       <StatCard
-        title="Ventas del Día"
-        icon={<ChartSquare size={18} weight="BoldDuotone"/>}
-        accent="success"
-        value="$4,285.50"
-        delta="↑ 12.5%"
-        trend="up"
-        variant="sparkline"
-        sparklineData={[8, 10, 9, 14, 16, 15, 18, 22, 20, 24]}
-        caption="127 transacciones"
+        title="Volumen Máximo"
+        icon={<Water size={18} weight="BoldDuotone" />}
+        accent="primary"
+        value="78.5%"
+        variant="progress"
+        progress={78.5}
+        progressLabel="40,925L"
+        caption="Mibanco - Canto Grande"
+        extraInfo={[
+          { label: "Promedio", value: "58.7 L/min", color: "text-primary" },
+          { label: "Pico", value: "92.1 L/min", color: "text-success" },
+        ]}
       />
 
       <StatCard
         title="Dispositivos Conectados"
         icon={<WiFiRouterMinimalistic size={18} weight="BoldDuotone" />}
         accent="primary"
-        value="8/8"
+        value="124/200"
+        delta="80%"
         trend="up"
-        caption="✓ 100% operacional"
+        variant="chart"
+        chartType="radial"
+        chartData={deviceStatusData}
+        chartTotal={160}
+        caption="Operacional"
+        captionIcon={<RoundAltArrowRight size={12} className="text-default-300" />}
+        
       />
 
       <StatCard
-        title="Bombas Activas"
-        icon={<Accumulator size={18} weight="BoldDuotone" />}
+        title="Alertas Activas"
+        icon={<Danger size={18} weight="BoldDuotone" />}
         accent="warning"
-        value="6/8"
+        value="64"
+        delta="8.2%"
         trend="down"
-        caption="2 en mantenimiento"
+        variant="chart"
+        chartType="pie"
+        chartData={alertStatusData}
+        chartTotal={14}
+        chartPaddingAngle={3}
+        caption="2 dispositivos críticos"       
       />
     </div>
   );

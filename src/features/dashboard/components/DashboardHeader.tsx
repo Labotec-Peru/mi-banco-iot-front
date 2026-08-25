@@ -24,7 +24,7 @@ export default function DashboardHeader({
     cod_nevera: "",
   });
 
-  const [isLoading, setIsLoading] = useState(false);
+
 
   const handleSignOut = () => {
     dispatch(logout());
@@ -36,7 +36,7 @@ export default function DashboardHeader({
   };
 
   return (
-    <div className="flex items-center justify-between gap-4">
+    <div className="flex items-center justify-between gap-4 px-8 pt-5">
       <div className="min-w-0">
         <h1 className="text-xl font-bold text-foreground">
           Bienvenido, {userName}!
@@ -59,7 +59,6 @@ export default function DashboardHeader({
 
             onApply();
           }}
-          isLoading={isLoading}
           placeholder="Buscar dispositivo"
         />
 

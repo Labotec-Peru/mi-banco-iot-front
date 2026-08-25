@@ -3,14 +3,21 @@ import { NavLink, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   AltArrowDown,
-  Bag4,
-  Box,
   UserCircle,
   ChartSquare,
   SettingsMinimalistic,
   MinusCircle,
-  Widget6,
   HamburgerMenu,
+  Bell,
+  Pulse2,
+  Programming,
+  UsersGroupRounded,
+  ShieldUser,
+  History,
+  LockKeyhole,
+  Translation,
+  SpedometerMiddle,
+  Widget5,
 } from "@solar-icons/react";
 import { Button } from "@heroui/react";
 import { useSelector } from "react-redux";
@@ -32,34 +39,90 @@ type SidebarSection = {
 
 const SIDEBAR_SECTIONS: SidebarSection[] = [
   {
-    title: "General",
+    title: "Operación",
     items: [
-      { codigo: 1, name: "Inicio", path: "/dashboard", icon: Widget6 },
-      { codigo: 2, name: "Pedidos", path: "/sensores", icon: Bag4, badge: 2 },
-      { codigo: 3, name: "Productos", path: "/products", icon: Box },
-      { codigo: 4, name: "Clientes", path: "/customers", icon: UserCircle, badge: 4 },
+      {
+        codigo: 1,
+        name: "Inicio",
+        path: "/dashboard",
+        icon: Widget5,       
+      },
+      {
+        codigo: 2,
+        name: "Medidores",
+        path: "/medidores",
+        icon: SpedometerMiddle,
+        badge: 2,
+      },
+      {
+        codigo: 3,
+        name: "Sensores",
+        path: "/sensores",
+        icon: Translation,
+      },
+      {
+        codigo: 4,
+        name: "Lecturas",
+        path: "/graph",
+        icon: ChartSquare,
+        badge: 4,
+      },
+      {
+        codigo: 5,
+        name: "Alertas",
+        path: "/alertas",
+        icon: Bell,
+        badge: 4,
+      },
     ],
-  },
+  },  
+
   {
     title: "Herramientas",
     items: [
-      { codigo: 5, name: "Analíticas", path: "/analytics", icon: ChartSquare },
-      { codigo: 6, name: "Configuración", path: "/settings", icon: SettingsMinimalistic },
+      {
+        codigo: 9,
+        name: "Comandos",
+        path: "/command",
+        icon: Programming,
+      },      
     ],
   },
+
   {
     title: "Administración",
     items: [
       {
-        codigo: 7,
+        codigo: 11,
         name: "Usuarios",
-        path: "/users",
-        icon: UserCircle,
+        path: "/usuarios",
+        icon: UsersGroupRounded,
         children: [
-          { codigo: 71, name: "Listado", path: "/users", icon: UserCircle },
-          { codigo: 72, name: "Roles", path: "/roles", icon: UserCircle },
-          { codigo: 73, name: "Permisos", path: "/permissions", icon: UserCircle },
+          {
+            codigo: 111,
+            name: "Listado",
+            path: "/usuarios",
+            icon: UserCircle,
+          },
+          {
+            codigo: 112,
+            name: "Roles",
+            path: "/roles",
+            icon: ShieldUser,
+          },
+          {
+            codigo: 113,
+            name: "Permisos",
+            path: "/permisos",
+            icon: LockKeyhole,
+          },
         ],
+      },
+      {
+        codigo: 12,
+        name: "Configuración",
+        path: "/configuracion",
+        icon: SettingsMinimalistic,
       },
     ],
   },
@@ -167,7 +230,7 @@ export default function Sidebar() {
         >
           <div className={`flex items-center h-20 shrink-0 ${expanded ? "px-5 justify-between" : "justify-center"}`}>
             <div className="flex items-center overflow-hidden" onClick={toggleSidebar}>
-              <img src="/icologo.svg" alt="Logo" className={`${expanded ? "h-9" : "h-8"} shrink-0`} />
+              <img src="/icologoSVGamarillo.svg" alt="Logo" className={`${expanded ? "h-12" : "h-10"} shrink-0`} />
               <AnimatePresence>
                 {expanded && (
                   <motion.span
@@ -177,14 +240,18 @@ export default function Sidebar() {
                     transition={{ duration: 0.15 }}
                     className="font-bold text-lg text-foreground whitespace-nowrap"
                   >
-                    <img src="/textlogo.svg" alt="Logo" className="h-14" />
+                    <img
+                      src="/textlogomibanco.svg"
+                      alt="Logo"
+                      className="h-5 -ml-4"
+                    />
                   </motion.span>
                 )}
               </AnimatePresence>
             </div>
           </div>
 
-         
+
 
           <nav className="flex-1 flex flex-col overflow-y-auto pb-1">
             {SIDEBAR_SECTIONS.map((section, sIdx) => (
@@ -195,9 +262,9 @@ export default function Sidebar() {
                   : ""
                   }`}
               >
-                  <p className="text-xs font-medium text-default-400 mb-2 mt-1 px-5 truncate dark:text-default-500">
-                    {section.title}
-                  </p>
+                <p className="text-xs font-medium text-default-400 mb-2 mt-1 px-5 truncate dark:text-default-500">
+                  {section.title}
+                </p>
 
                 {section.items.map((item) => {
                   const Icon = item.icon;
@@ -222,9 +289,9 @@ export default function Sidebar() {
                             }
                             setOpenMenus((prev) => ({ ...prev, [item.codigo]: !prev[item.codigo] }));
                           }}
-                          className={`relative flex items-center h-11 transition-colors duration-200 ${expanded ? "mx-3 px-3 rounded-full" : "mx-auto w-11 justify-center rounded-full"
+                          className={`relative flex items-center h-11 transition-colors duration-200 ${expanded ? "mx-3 px-3 rounded-md" : "mx-auto w-11 justify-center rounded-full"
                             } ${showPill
-                              ? "text-background"
+                              ? "text-white dark:text-black"
                               : active
                                 ? "text-foreground font-semibold"
                                 : "text-default-500 hover:bg-default-100"
@@ -234,7 +301,7 @@ export default function Sidebar() {
                             <motion.div
                               layoutId="sidebar-active-pill"
                               transition={{ type: "spring", stiffness: 350, damping: 30 }}
-                              className="absolute inset-0 rounded-full bg-primary z-0"
+                              className="absolute inset-0 rounded-full bg-primary dark:bg-secondary z-0"
                             />
                           )}
 
@@ -272,13 +339,13 @@ export default function Sidebar() {
                             if (isMobile) setIsMobileOpen(false);
                           }}
                           className={`relative flex items-center h-11 transition-colors duration-200 ${expanded ? "mx-3 px-3 rounded-full" : "mx-auto w-11 justify-center rounded-full"
-                            } ${active ? "text-background dark:text-foreground" : "text-default-500 hover:bg-default-100"}`}
+                            } ${active ? "text-white dark:text-black" : "text-default-500 hover:bg-default-100"}`}
                         >
                           {active && (
                             <motion.div
                               layoutId="sidebar-active-pill"
                               transition={{ type: "spring", stiffness: 350, damping: 30 }}
-                              className="absolute inset-0 rounded-full bg-primary  z-0"
+                              className="absolute inset-0 rounded-full bg-primary dark:bg-secondary z-0"
                             />
                           )}
 
@@ -332,12 +399,13 @@ export default function Sidebar() {
                                       <motion.div
                                         layoutId="sidebar-active-child-pill"
                                         transition={{ type: "spring", stiffness: 350, damping: 30 }}
-                                        className="absolute inset-0 rounded-full bg-background shadow-sm z-0"
+                                        className="absolute inset-0 rounded-full  shadow-sm z-0"
+                                        
                                       />
                                     )}
                                     <span
                                       className={`relative z-10 flex items-center gap-3 ${childActive
-                                        ? "text-foreground font-medium"
+                                        ? " dark:text-white text-black font-medium"
                                         : "text-default-500 hover:text-foreground"
                                         }`}
                                     >

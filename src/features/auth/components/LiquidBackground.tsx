@@ -9,7 +9,6 @@ interface BlobProps {
   lag: { stiffness: number; damping: number };
   offsetX: number;
   offsetY: number;
-  floatPath: { x: number[]; y: number[] };
   duration: number;
 }
 
@@ -22,7 +21,6 @@ function LiquidBlob({
   lag,
   offsetX,
   offsetY,
-  floatPath,
   duration,
 }: BlobProps) {
   const springX = useSpring(mouseX, lag);
@@ -92,9 +90,9 @@ export function LiquidBackground({
       </svg>
 
       <div className="absolute inset-0 mix-blend-screen" style={{ filter: "url(#goo-filter)" }}>
-        <LiquidBlob mouseX={mouseX} mouseY={mouseY} isHovered={isHovered} size={420} color="rgba(42, 60, 255, 0.65)" lag={{ stiffness: 35, damping: 40 }} offsetX={-180} offsetY={-80} floatPath={{ x: [-120, 150, -80], y: [-90, 100, -50] }} duration={14} />
-        <LiquidBlob mouseX={mouseX} mouseY={mouseY} isHovered={isHovered} size={340} color="rgba(0, 229, 179, 0.5)" lag={{ stiffness: 55, damping: 20}} offsetX={200} offsetY={120} floatPath={{ x: [140, -100, 120], y: [90, -120, 60] }} duration={11} />
-        <LiquidBlob mouseX={mouseX} mouseY={mouseY} isHovered={isHovered} size={260} color="rgba(0, 0, 9, 0.5)" lag={{ stiffness: 85, damping: 14 }} offsetX={40} offsetY={-160} floatPath={{ x: [80, -140, 60], y: [-150, 80, -100] }} duration={9} />
+        <LiquidBlob mouseX={mouseX} mouseY={mouseY} isHovered={isHovered} size={420} color="rgba(42, 60, 255, 0.65)" lag={{ stiffness: 35, damping: 40 }} offsetX={-180} offsetY={-80} duration={14} />
+        <LiquidBlob mouseX={mouseX} mouseY={mouseY} isHovered={isHovered} size={340} color="rgba(0, 229, 179, 0.5)" lag={{ stiffness: 55, damping: 20}} offsetX={200} offsetY={120} duration={11} />
+        <LiquidBlob mouseX={mouseX} mouseY={mouseY} isHovered={isHovered} size={260} color="rgba(0, 0, 9, 0.5)" lag={{ stiffness: 85, damping: 14 }} offsetX={40} offsetY={-160} duration={9} />
       </div>
 
       <div className="absolute inset-0 backdrop-blur-2xl pointer-events-none" />

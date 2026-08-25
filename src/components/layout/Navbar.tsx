@@ -1,58 +1,10 @@
-import { useMemo, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { logout } from "../../features/auth/authSlice";
 
 import { Logout3, Magnifer, BellBing } from "@solar-icons/react";
 import { Input } from "@heroui/react";
-
-const routeInfoMap = [
-  {
-    keyword: "/dashboard/location",
-    title: "Ubicación",
-    subtitle: "Monitoreo geográfico y tracking del sistema",
-  },
-  {
-    keyword: "/dashboard/device",
-    title: "Detalle de Dispositivo",
-    subtitle: "Consola de estado, métricas y telemetría",
-  },
-  {
-    keyword: "/dashboard",
-    title: "Inicio",
-    subtitle: "Administre sus dispositivos en tiempo real",
-  },
-  {
-    keyword: "/devices",
-    title: "Dispositivos",
-    subtitle: "Listado completo de terminales conectados",
-  },
-  {
-    keyword: "/graphics",
-    title: "Gráficos y Estadísticas",
-    subtitle: "Visualización de datos analíticos",
-  },
-  {
-    keyword: "/alerts",
-    title: "Alertas y Notificaciones",
-    subtitle: "Historial de advertencias y eventos del sistema",
-  },
-  {
-    keyword: "/users",
-    title: "Usuarios",
-    subtitle: "Control de operadores y permisos de acceso",
-  },
-  {
-    keyword: "/client",
-    title: "Clientes",
-    subtitle: "Gestión de cuentas y partners comerciales",
-  },
-  {
-    keyword: "/command",
-    title: "Línea de Comandos",
-    subtitle: "Envío manual de payloads y scripts remotos",
-  },
-];
 
 const UNREAD_ALERTS_COUNT = 3;
 
@@ -61,17 +13,6 @@ export default function Navbar() {
   const navigate = useNavigate();
 
   const user = useSelector((state: any) => state.auth.user);
-
-  const location = useLocation();
-  const pageMeta = useMemo(() => {
-    const currentPath = location.pathname;
-    const matchedRoute = routeInfoMap.find((route) =>
-      currentPath.startsWith(route.keyword),
-    );
-    return (
-      matchedRoute || { title: "Panel", subtitle: "Bienvenido al sistema" }
-    );
-  }, [location.pathname]);
 
   const [search, setSearch] = useState("");
 

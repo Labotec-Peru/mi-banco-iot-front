@@ -14,7 +14,9 @@ import Devices from "../features/devices/pages/Devices";
 import Alerts from "../features/alerts/pages/Alerts";
 import Users from "../features/users/page/Users";
 import Indicadores from "../features/indicadores/page/Indicadores";
-
+import Medidores from "../features/medidores/page/Medidores";
+import Graph from "../features/graph/page/Graph";
+import Command from "../features/command/pages/Command";
 export default function AppRoutes() {
   return (
     <BrowserRouter>
@@ -35,6 +37,10 @@ export default function AppRoutes() {
             <Route path="/alertas" element={<Alerts />} />
             <Route path="/usuarios" element={<Users />} />
             <Route path="/indicadores" element={<Indicadores />} />
+            <Route path="/medidores" element={<Medidores />} />
+            <Route path="/graph" element={<Graph />} />
+            <Route path="/command" element={<Command />} />
+
           </Route>
 
           <Route path="*" element={<NotFound />} />

@@ -15,7 +15,10 @@
     "@heroui/styles": "^3.2.2",
     "@heroui/theme": "^2.4.26",
     "@internationalized/date": "^3.12.2",
+    "@react-aria/i18n": "^3.13.1",
     "@react-oauth/google": "^0.13.5",
+    "@react-types/calendar": "^3.9.0",
+    "@react-types/shared": "^3.36.1",
     "@reduxjs/toolkit": "^2.12.0",
     "@solar-icons/react": "^1.1.1",
     "@tailwindcss/vite": "^4.3.2",
@@ -29,7 +32,8 @@
     "react-redux": "^9.3.0",
     "react-router-dom": "^7.18.1",
     "recharts": "^3.9.2",
-    "thinking-orbs": "^0.2.0"
+    "thinking-orbs": "^0.2.0",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@types/geojson": "^7946.0.14",

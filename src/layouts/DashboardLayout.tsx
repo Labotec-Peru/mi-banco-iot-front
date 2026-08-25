@@ -1,8 +1,7 @@
 import { Outlet } from "react-router-dom";
 import Sidebar from "../components/layout/Sidebar";
-import Navbar from "../components/layout/Navbar";
-import DashboardTabs from "../components/layout/DashboardTabs";
 import { NeveraFilterProvider } from "../features/dashboard/contexts/NeveraFilterContext";
+import DashboardHeader from "../features/dashboard/components/DashboardHeader";
 
 export default function DashboardLayout() {
   
@@ -11,7 +10,7 @@ export default function DashboardLayout() {
       <div className="flex h-screen overflow-hidden">
         <Sidebar />
         <div className="flex flex-col flex-1 min-w-0 relative">
-          {/* <Navbar /> */}
+          <DashboardHeader userName="Roberto" />
           <main className="flex-1 overflow-auto">
             <Outlet />
           </main>

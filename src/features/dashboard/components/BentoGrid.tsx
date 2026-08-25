@@ -1,9 +1,8 @@
 import Panel from "./Panel";
-import ValveStatusPanel from "./Valvestatuspanel";
-import FlowRatePanel from "./Flowratepanel";
+import GraphicsPanel from "./GraphicsPanel";
 import DeviceListPanel from "./Deviceinfopanel";
-import ConnectivityPanel from "./Connectivitypanel";
 import NeverasMapa from "./NeverasMapa";
+
 const devices = [
   {
     id: "DEV-00125",
@@ -56,93 +55,25 @@ const devices = [
 
 export default function BentoGrid() {
   return (
-    <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 py-2">
-      <Panel
-        title="Dispositivos"
-        subtitle="Con alertas activas"
-        className="lg:col-span-2 min-h-[220px]"
-      >
-        <DeviceListPanel
-          devices={devices}         
-          onSelectDevice={(id) =>
-            console.log("Ver dispositivo", id)
-          }
-        />
-      </Panel>
+    <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 py-2 items-stretch">
+      <div className="lg:col-span-2 lg:row-span-1">
+        <Panel title="Ubicación del dispositivo" className="h-full">
+          <NeverasMapa />
+        </Panel>
+      </div>
 
-
-
-      <Panel
-        title="Ubicación del dispositivo"
-        className="
-          lg:col-start-3
-          lg:row-start-1
-          lg:row-span-2
-          min-h-[460px]
-          lg:h-full
-        "
-      >
-        <NeverasMapa />
-      </Panel>
-
-
-
-      <div
-        className="
-          flex
-          flex-col
-          gap-6
-          lg:col-span-2
-          lg:flex-row
-        "
-      >
-
-        <Panel
-          title="Estado de la válvula"
-          className="min-w-0 flex-1"
-        >
-          <ValveStatusPanel
-            pressure={3.2}
-            pressureRange={[2, 5]}
-            initialOpen
-            lastChanged="Hace 3 h"
+      <div className="flex flex-col gap-6 lg:col-span-1">        
+        <Panel title="Dispositivos" subtitle="Con alertas activas">
+         <DeviceListPanel
+            devices={devices}
+            onSelectDevice={(id: string) =>
+              console.log("Ver dispositivo", id)
+            }
           />
         </Panel>
-
-
-        <Panel
-          title="Conectividad"
-          className="min-w-0 flex-1"
-        >
-          <ConnectivityPanel
-            signalStrength={3}
-            batteryLevel={72}
-            lastSync="Hace 2 min"
-            isOnline
-          />
+        <Panel title="Estado de Dispositivo">
+          <GraphicsPanel />
         </Panel>
-
-
-        <Panel
-          title="Caudal en tiempo real"
-          className="min-w-0 flex-1"
-        >
-          <FlowRatePanel
-            flow={12.4}
-            normalRange={[8, 20]}
-            history={[
-              10,
-              11,
-              9,
-              13,
-              14,
-              12,
-              15,
-              12.4,
-            ]}
-          />
-        </Panel>
-
       </div>
     </div>
   );

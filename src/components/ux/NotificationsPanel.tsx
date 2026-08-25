@@ -3,7 +3,6 @@ import {
     Badge,
     Button,
     Chip,
-    Divider,
     Drawer,
     DrawerBody,
     DrawerContent,
@@ -200,7 +199,7 @@ export default function NotificationsPanel() {
                     shape="circle"
                     isInvisible={unreadCount === 0}
                     classNames={{
-                        badge: "text-[9px] min-w-4 h-4 px-1 font-bold border-2 border-background",
+                        badge: "text-[9px] min-w-4 h-4 px-1 font-bold border-2 border-background dark:text-black text-white",
                     }}
                 >
                     <Bell weight="BoldDuotone" size={20} />

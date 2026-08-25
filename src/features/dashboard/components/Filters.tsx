@@ -4,7 +4,6 @@ import {
   SelectItem,
   Button,
   Input,
-  Spinner,
   Dropdown,
   DropdownTrigger,
   DropdownMenu,
@@ -194,7 +193,7 @@ export default function Filters({
               className="flex items-center justify-center"
             >
               {isLoading ? (
-                <ThinkingOrb state="solving" size={20} />
+                <ThinkingOrb state="composing" size={20} />
               ) : (
                 <Magnifier size={18} />
               )}

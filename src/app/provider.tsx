@@ -34,7 +34,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <HeroUIProvider>
+    <HeroUIProvider locale="es-ES" >
       <ThemeContext.Provider value={{ theme, toggleTheme }}>
         {children}
       </ThemeContext.Provider>

@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import Map from "./Map";
 import Filters from "./Filters";
 import { useGetNeverasMapaQuery, useGetTalleresNestleQuery } from "../services/mapApi";
-import { Spinner } from "@heroui/react";
+
 import MAP_STYLES from "../styles/MAP_STYLES";
 import { ESTADOS_NEVERA } from "../services/estadoNeveraConstants";
 import { useNeveraFilterContext } from "../contexts/NeveraFilterContext";
@@ -26,7 +26,6 @@ export default function NeverasMapa() {
     departamento: "",
   });
   const [apiFilters, setApiFilters] = useState(filters);
-
   const { mapStyle, setMapStyle } = useSyncMapTheme();
 
   useEffect(() => {
@@ -60,17 +59,6 @@ export default function NeverasMapa() {
     departamento: apiFilters.departamento,
   });
   const talleres = talleresData?.data ?? [];
-
-  // ❌ ELIMINA estas líneas (están duplicadas)
-  // const [mapStyle, setMapStyle] = useState(
-  //   () => localStorage.getItem("map-style") ?? MAP_STYLES[0].value
-  // );
-
-  // ❌ ELIMINA esta función (ya no es necesaria)
-  // const handleSetMapStyle = (value: string) => {
-  //   setMapStyle(value);
-  //   localStorage.setItem("map-style", value);
-  // };
 
   const {
     data,
@@ -125,7 +113,7 @@ export default function NeverasMapa() {
         neveras={neveras}
         mapStyle={mapStyle}
         showMapStyles={true}
-        showFilters={false}        
+        showFilters={false}
         setMapStyle={setMapStyle}
         mapStyles={MAP_STYLES}
       />
@@ -141,7 +129,7 @@ export default function NeverasMapa() {
       {(isLoading) && (
         <div className="absolute inset-0 z-1 flex items-center justify-center bg-black/20 backdrop-blur-sm">
           <div className="px-8 py-6 flex flex-col items-center gap-4">
-            <ThinkingOrb state="solving" size={64} />
+            <ThinkingOrb state="composing" size={64} />
             <span className="text-sm font-medium text-white">
               Cargando ...
             </span>

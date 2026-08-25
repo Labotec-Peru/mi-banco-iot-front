@@ -1,5 +1,5 @@
 import { Chip } from "@heroui/react";
-import { AltArrowRight } from "@solar-icons/react";
+import { AltArrowRight, Bolt, Danger } from "@solar-icons/react";
 
 type AlertLevel = "critical" | "warning" | "none";
 
@@ -14,8 +14,7 @@ type Device = {
 type DeviceListPanelProps = {
     devices: Device[];
     onSelectDevice?: (deviceId: string) => void;
-    height?: string;
-    minCardWidth?: string;
+    maxItems?: number;
 };
 
 function getLevelConfig(level: AlertLevel) {
@@ -23,23 +22,29 @@ function getLevelConfig(level: AlertLevel) {
         case "critical":
             return {
                 dot: "bg-danger-500",
+                ring: "ring-danger-500/15",
+                iconBg: "bg-danger-500/10",
+                iconColor: "text-danger-500",
                 chipColor: "danger" as const,
                 label: "Crítica",
-                borderColor: "border-danger-200/30 dark:border-danger-500/20",
             };
         case "warning":
             return {
                 dot: "bg-warning-500",
+                ring: "ring-warning-500/15",
+                iconBg: "bg-warning-500/10",
+                iconColor: "text-warning-500",
                 chipColor: "warning" as const,
                 label: "Advertencia",
-                borderColor: "border-warning-200/30 dark:border-warning-500/20",
             };
         default:
             return {
                 dot: "bg-default-300 dark:bg-default-600",
+                ring: "ring-default-200/40",
+                iconBg: "bg-default-100 dark:bg-default-500/10",
+                iconColor: "text-default-400",
                 chipColor: "default" as const,
                 label: "Normal",
-                borderColor: "border-divider border-zinc-200 dark:border-primary/20",
             };
     }
 }
@@ -47,26 +52,39 @@ function getLevelConfig(level: AlertLevel) {
 export default function DeviceListPanel({
     devices,
     onSelectDevice,
-    height = "180px",
-    minCardWidth = "180px",
+    maxItems = 4,
 }: DeviceListPanelProps) {
-    const alertCount = devices.filter(
-        (d) => d.alertLevel !== "none"
-    ).length;
+    const alerted = devices.filter((d) => d.alertLevel !== "none");
+    const visible = alerted.slice(0, maxItems);
+    const remaining = alerted.length - visible.length;
+
+    if (alerted.length === 0) {
+        return (
+            <div className="flex flex-col items-center justify-center gap-2 py-8 text-center">
+                <div className="rounded-full bg-success-500/10 p-3">
+                    <Bolt size={20} className="text-success-500" />
+                </div>
+                <p className="text-xs text-default-400">
+                    Todos los dispositivos operan con normalidad
+                </p>
+            </div>
+        );
+    }
 
     return (
-        <div className="flex flex-col gap-3 ">
-            {alertCount > 0 && (
+        <div className="flex flex-col">
+            <div className="flex items-center justify-between pb-3">
                 <p className="text-xs font-medium text-default-400">
-                    {alertCount} dispositivo{alertCount > 1 ? "s" : ""} con alertas
+                    {alerted.length} dispositivo{alerted.length > 1 ? "s" : ""} con alertas
                 </p>
-            )}
+                <span className="flex items-center gap-1 text-[10px] text-danger-500">
+                    <Danger size={12} weight="Bold" />
+                    {devices.filter((d) => d.alertLevel === "critical").length} críticas
+                </span>
+            </div>
 
-            <div
-                className="flex gap-3 overflow-x-auto overflow-y-hidden pb-3"
-                style={{ height }}
-            >
-                {devices.map((device) => {
+            <div className="flex flex-col divide-y divide-divider/10">
+                {visible.map((device) => {
                     const config = getLevelConfig(device.alertLevel);
 
                     return (
@@ -74,110 +92,86 @@ export default function DeviceListPanel({
                             key={device.id}
                             type="button"
                             onClick={() => onSelectDevice?.(device.id)}
-                            className={`
+                            className="
                                 group
-                                relative
                                 flex
-                                shrink-0
-                                flex-col
-                                rounded-xl
-                                border
-                                ${config.borderColor}
-                                bg-content1/40
-                                p-4
+                                items-center
+                                gap-3
+                                py-2.5
                                 text-left
-                                transition-all
-                                duration-200
-                                hover:border-primary/30
-                                hover:bg-content2/30
-                                hover:shadow-sm
-                                active:scale-[0.98]
-                            `}
-                            style={{ minWidth: minCardWidth }}
+                                transition-colors
+                                duration-150
+                                hover:bg-content2/40
+                                rounded-lg
+                                px-2
+                                -mx-2
+                            "
                         >
-                            <div className="flex items-start justify-between gap-2">
-                                <div className="flex items-center gap-2 min-w-0">
-                                    <span
-                                        className={`h-2 w-2 min-w-2 rounded-full ${config.dot}`}
-                                    />
+                            <span
+                                className={`h-2 w-2 shrink-0 rounded-full ${config.dot} ring-4 ${config.ring}`}
+                            />
+
+                            <div className="min-w-0 flex-1">
+                                <div className="flex items-center gap-2">
                                     <span className="text-sm font-medium text-foreground truncate">
                                         {device.id}
                                     </span>
+                                    <Chip
+                                        size="sm"
+                                        variant="flat"
+                                        color={config.chipColor}
+                                        classNames={{
+                                            base: "h-4 shrink-0",
+                                            content: "px-1.5 text-[9px] font-medium",
+                                        }}
+                                    >
+                                        {config.label}
+                                    </Chip>
                                 </div>
-                                <Chip
-                                    size="sm"
-                                    variant="flat"
-                                    color={config.chipColor}
-                                    classNames={{
-                                        base: "h-5 shrink-0",
-                                        content: "px-1.5 text-[9px] font-medium",
-                                    }}
-                                >
-                                    {config.label}
-                                </Chip>
+                                <p className="text-xs text-default-500 truncate">
+                                    {device.alertMessage ?? device.location}
+                                </p>
                             </div>
 
-                            <p className="mt-2 text-xs text-default-500 line-clamp-2 flex-1">
-                                {device.alertLevel !== "none" && device.alertMessage
-                                    ? device.alertMessage
-                                    : device.location}
-                            </p>                            
-                            <div className={`mt-3 flex items-center justify-between pt-2 border-t border-divider/40 border-dashed ${config.borderColor}`}>
-                                <span className="text-[10px] text-default-400">
-                                    {device.status === "active" ? "Activo" : "Inactivo"}
-                                </span>
-                                
-                                <AltArrowRight
-                                    size={14}
-                                    className="
-                                        text-default-300
-                                        transition-all
-                                        duration-200
-                                        group-hover:translate-x-0.5
-                                        group-hover:text-primary group-hover:dark:text-secondary 
-                                        group-hover:opacity-100
-                                    "
-                                />
-                            </div>
+                            <AltArrowRight
+                                size={14}
+                                className="
+                                    shrink-0
+                                    text-default-300
+                                    transition-all
+                                    duration-200
+                                    group-hover:translate-x-0.5
+                                    group-hover:text-primary
+                                    dark:group-hover:text-secondary
+                                "
+                            />
                         </button>
                     );
                 })}
-
-                {devices.length > 0 && (
-                    <button
-                        type="button"
-                        className="
-                            group
-                            flex
-                            shrink-0
-                            flex-col
-                            items-center
-                            justify-center
-                            rounded-xl
-                            border
-                            border-dashed
-                            border-divider
-                            bg-transparent
-                            p-4
-                            transition-all
-                            duration-200
-                            hover:border-primary/30
-                            hover:bg-content2/20
-                        "
-                        style={{ minWidth: minCardWidth }}
-                        onClick={() => onSelectDevice?.("all")}
-                    >
-                        <span className="text-2xl font-light text-default-400 group-hover:text-primary">
-                            +
-                        </span>
-                        <span className="mt-1 text-xs text-default-400 group-hover:text-primary">
-                            Ver todos
-                        </span>
-                    </button>
-                )}
             </div>
 
-            
+            {remaining > 0 && (
+                <button
+                    type="button"
+                    onClick={() => onSelectDevice?.("all")}
+                    className="
+                        mt-2
+                        rounded-lg
+                        border
+                        border-dashed
+                        border-divider
+                        py-2
+                        text-center
+                        text-xs
+                        text-default-400
+                        transition-colors
+                        hover:border-primary/30
+                        hover:text-primary
+                    "
+                >
+                    Ver {remaining} más
+                </button>
+            )}
         </div>
     );
 }
