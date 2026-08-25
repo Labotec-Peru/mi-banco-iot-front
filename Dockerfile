@@ -4,13 +4,15 @@ WORKDIR /app
 
 ENV NODE_OPTIONS="--max-old-space-size=2048"
 
-COPY package*.json ./
+RUN npm i -g pnpm
 
-RUN npm install
+COPY package.json pnpm-lock.yaml ./
+
+RUN pnpm install --frozen-lockfile
 
 COPY . .
 
-RUN npm run build
+RUN pnpm build
 
 FROM nginx:alpine
 
