@@ -1,4 +1,4 @@
-#  2026-entel-frontend (Plataforma de Monitoreo IoT en Tiempo Real)
+#  Medidores-labotec (Plataforma de Monitoreo IoT en Tiempo Real)
 
 Este proyecto es el Frontend modular y escalable construido para la visualización en tiempo real de neveras y otros dispositivos IoT (Internet de las Cosas). Está diseñado siguiendo las mejores prácticas de la industria para soportar un alto volumen de datos dinámicos, mapas interactivos y un estado global centralizado.
 
