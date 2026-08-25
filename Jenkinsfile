@@ -2,15 +2,15 @@ pipeline {
     agent any
 
     environment {
-        PROJECT_NAME     = 'tesla-ascensores-web'
+        PROJECT_NAME     = 'mi-banco-iot-web'
         BUILD_DIR        = 'dist' 
-        DOCKER_IMAGE     = "tesla-ascensores-web"
+        DOCKER_IMAGE     = "mi-banco-iot-web"
         NETWORK          = "home-net"
         SERVER_USER      = "root"
         SERVER_HOST      = "5.189.180.249"
         SERVER_PORT      = "22"
         SSH_CREDENTIAL_ID  = 'puyu-iot'
-        HTTP_PORT       = "5080"
+        HTTP_PORT       = "5096"
     }
 
     stages {
