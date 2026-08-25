@@ -136,11 +136,11 @@ export default function SeriesTabla() {
         },
     ];
 
-    function handleExportExcel(e: PressEvent): void {
+    function handleExportExcel(_e: PressEvent): void {
         throw new Error("Function not implemented.");
     }
 
-    function handleCreate(e: PressEvent): void {
+    function handleCreate(_e: PressEvent): void {
         throw new Error("Function not implemented.");
     }
 

@@ -4,7 +4,7 @@ import TableComponent, {
     type CustomColumnDef,
     type FilterFieldDef,
 } from "../../../components/ux/TableComponent";
-import { Chip, Button, Tooltip, Card, CardBody, CardHeader, Divider } from "@heroui/react";
+import { Chip, Button, Tooltip, Card, CardBody, CardHeader } from "@heroui/react";
 import {
     AddCircle,
     FileDownload,
@@ -268,18 +268,7 @@ export default function Command() {
         const start = (page - 1) * pageSize;
         return filteredData.slice(start, start + pageSize);
     }, [filteredData, page, pageSize]);
-
-    const getStatusCounts = () => {
-        const counts = { Pendiente: 0, Aplicado: 0, Fallido: 0 };
-        MOCK_COMMANDS.forEach((cmd) => {
-            if (cmd.estado in counts) {
-                counts[cmd.estado as keyof typeof counts]++;
-            }
-        });
-        return counts;
-    };
-
-    const statusCounts = getStatusCounts();
+  
 
     const columns: CustomColumnDef<CommandItem>[] = useMemo(
         () => [

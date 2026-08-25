@@ -1,4 +1,3 @@
-import { useState } from "react";
 import RadialChart, { type RadialChartData } from "./RadialChart";
 import RadialLegend, { type RadialLegendItem } from "./RadialLegend";
 

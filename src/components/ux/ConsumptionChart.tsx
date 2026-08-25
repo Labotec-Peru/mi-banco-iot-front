@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
     ComposedChart,
     Line,
@@ -10,11 +10,9 @@ import {
     ResponsiveContainer,
     Brush,
     ReferenceLine,
-    ReferenceArea,
 } from 'recharts';
-import { Card, CardBody, Button, Tabs, Tab, Chip } from '@heroui/react';
+import { Card, CardBody, Button, Chip } from '@heroui/react';
 import {
-    Refresh,
     ArrowUp,
     Water,
     Database,
@@ -119,7 +117,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 };
 
 export default function FlowVolumeChart() {
-    const [period, setPeriod] = useState('24h');
+    const [period] = useState('24h');
     const [metric, setMetric] = useState<'flujo' | 'volumen' | 'ambos'>('ambos');
     const [brushIndex, setBrushIndex] = useState<[number, number] | null>(null);
 
@@ -137,11 +135,7 @@ export default function FlowVolumeChart() {
     };
 
     const data = getChartData();
-
-    const handleReset = () => {
-        setBrushIndex(null);
-    };
-
+   
     return (
         <Card shadow="none" className="0">
             <CardBody className="p-4">
@@ -173,7 +167,7 @@ export default function FlowVolumeChart() {
                                 color={metric === 'flujo' ? 'primary' : 'default'}
                                 onPress={() => setMetric('flujo')}
                                 className="text-xs"
-                                startContent={<Water size={18}  weight="Bold" />}
+                                startContent={<Water size={18} weight="Bold" />}
                             >
                                 Flujo
                             </Button>

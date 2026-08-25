@@ -18,14 +18,7 @@ export default function StatsRow() {
     { name: "Críticas", value: 2, fill: "#ef4444" },
     { name: "Advertencia", value: 4, fill: "#eab308" },
     { name: "Informativas", value: 8, fill: "#3b82f6" },
-  ];
-
-  const connectivityData = [
-    { name: "4G", value: 45, fill: "#22c55e" },
-    { name: "3G", value: 28, fill: "#eab308" },
-    { name: "2G", value: 12, fill: "#f97316" },
-    { name: "Sin señal", value: 5, fill: "#ef4444" },
-  ];
+  ];  
 
   return (
     <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
