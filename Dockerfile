@@ -1,7 +1,7 @@
 FROM node:22-alpine AS builder
 WORKDIR /app
 ENV NODE_OPTIONS="--max-old-space-size=2048"
-RUN npm i -g pnpm
+RUN corepack enable && corepack prepare pnpm@11.12.0 --activate
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN pnpm install --frozen-lockfile
 COPY . .
