@@ -2,7 +2,6 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import AuthLayout from "../layouts/AuthLayout";
 import DashboardLayout from "../layouts/DashboardLayout";
-// import TabsLayout from "../layouts/TabsLayout";
 import PublicRoute from "./PublicRoute";
 import ProtectedRoute from "./ProtectedRoute";
 import Login from "../features/auth/pages/Login";
@@ -13,7 +12,6 @@ import NotFound from "../features/notFound/pages/NotFound";
 import Devices from "../features/devices/pages/Devices";
 import Alerts from "../features/alerts/pages/Alerts";
 import Users from "../features/users/page/Users";
-import Indicadores from "../features/indicadores/page/Indicadores";
 import Medidores from "../features/medidores/page/Medidores";
 import Graph from "../features/graph/page/Graph";
 import Command from "../features/command/pages/Command";
@@ -36,7 +34,6 @@ export default function AppRoutes() {
             <Route path="/sensores" element={<Devices />} />
             <Route path="/alertas" element={<Alerts />} />
             <Route path="/usuarios" element={<Users />} />
-            <Route path="/indicadores" element={<Indicadores />} />
             <Route path="/medidores" element={<Medidores />} />
             <Route path="/graph" element={<Graph />} />
             <Route path="/command" element={<Command />} />

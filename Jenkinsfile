@@ -19,13 +19,16 @@ pipeline {
         }
 
         stage('Build Docker Image') {
-            steps {
-                script {
-                    echo "Construyendo la imagen Docker para el front-end..."
-                    sh "docker build -t ${DOCKER_IMAGE} ."
-                }
+    steps {
+        script {
+            withCredentials([file(credentialsId: 'env-production-labotec', variable: 'ENV_FILE')]) {
+                sh 'cp $ENV_FILE .env.production'
             }
+            echo "Construyendo la imagen Docker para el front-end..."
+            sh "docker build --build-arg BUILD_MODE=production -t ${DOCKER_IMAGE} ."
         }
+    }
+}
         
         stage('Deploy to Server') {
             steps {

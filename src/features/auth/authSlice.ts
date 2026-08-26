@@ -1,7 +1,6 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import { authApi } from "./services/authApi";
 import type { UserAPIType } from "./services/loginService";
-
 interface AuthState {
   user: Omit<UserAPIType, "accessToken" | "tokenType"> | null;
   token: string | null;
@@ -75,12 +74,15 @@ const authSlice = createSlice({
         persistAuth(state);
       })
       .addMatcher(authApi.endpoints.login.matchRejected, (state, action) => {
+        const backendError = action.payload as any;
+
         state.user = null;
         state.token = null;
         state.isAuthenticated = false;
+
         state.error =
-          (action.payload as { error?: string } | undefined)?.error ??
-          action.error.message ??
+          backendError?.errorCode?.message ||
+          backendError?.messageType ||
           "No se pudo iniciar sesión.";
 
         persistAuth(state);

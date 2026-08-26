@@ -18,7 +18,8 @@ import {
     Database,
     SortHorizontal,
 } from '@solar-icons/react';
-
+import { boletaDataExample } from '../../config/types';
+import DescargaPdf from './DescargaPdf';
 const hourlyData = [
     { time: '00:00', flujo: 2.1, volumen: 126, promedio: 1.8, fuga: false },
     { time: '01:00', flujo: 2.3, volumen: 138, promedio: 1.8, fuga: false },
@@ -62,6 +63,15 @@ const monthlyData = Array.from({ length: 30 }, (_, i) => ({
     volumen: Math.random() * 3600 + 1800,
     promedio: 45,
 }));
+
+const boletaData = {
+    total: 20050,
+    fechaEmision: '24-08-2018',
+    fechaVencimiento: '10-09-2018',
+    lecturaActual: 140,
+    lecturaAnterior: 127,
+    consumo: 13.20,
+};
 
 const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
@@ -135,7 +145,7 @@ export default function FlowVolumeChart() {
     };
 
     const data = getChartData();
-   
+
     return (
         <Card shadow="none" className="0">
             <CardBody className="p-4">
@@ -171,16 +181,12 @@ export default function FlowVolumeChart() {
                             >
                                 Flujo
                             </Button>
-                            <Button
-                                size="sm"
-                                variant={metric === 'volumen' ? 'solid' : 'flat'}
-                                color={metric === 'volumen' ? 'secondary' : 'default'}
-                                onPress={() => setMetric('volumen')}
-                                className="text-xs"
-                                startContent={<Database size={18} weight="Bold" />}
-                            >
-                                Volumen
-                            </Button>
+                            <DescargaPdf
+                                data={boletaDataExample}
+                                fileName="boleta-agua-2018.pdf"
+                                buttonText="📄 Descargar Boleta"
+                                loadingText="⏳ Generando..."
+                            />                            
                         </div>
                     </div>
 

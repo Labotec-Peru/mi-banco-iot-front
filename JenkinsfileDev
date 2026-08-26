@@ -15,11 +15,14 @@ pipeline {
             steps { checkout scm }
         }
         stage('Build Docker Image') {
-            steps {
-                echo '🏗️ Construyendo imagen Docker...'
-                sh "docker build --memory=6g --network=host -t ${DOCKER_IMAGE} ."
-            }
+    steps {
+        withCredentials([file(credentialsId: 'env-development-labotec', variable: 'ENV_FILE')]) {
+            sh 'cp $ENV_FILE .env.development'
         }
+        echo '🏗️ Construyendo imagen Docker...'
+        sh "docker build --memory=6g --network=host --build-arg BUILD_MODE=development -t ${DOCKER_IMAGE} ."
+    }
+}
         stage('Deploy to Server') {
             steps {
                 script {

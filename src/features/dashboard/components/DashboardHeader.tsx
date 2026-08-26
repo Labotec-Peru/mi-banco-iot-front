@@ -36,7 +36,7 @@ export default function DashboardHeader({
   };
 
   return (
-    <div className="flex items-center justify-between gap-4 px-8 pt-5">
+    <div className="flex items-center justify-between gap-4 px-8 py-5 backdrop-blur-2xl">
       <div className="min-w-0">
         <h1 className="text-xl font-bold text-foreground">
           Bienvenido, {userName}!

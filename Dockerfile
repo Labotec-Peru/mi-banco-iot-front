@@ -5,7 +5,9 @@ RUN corepack enable && corepack prepare pnpm@11.12.0 --activate
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN pnpm install --frozen-lockfile
 COPY . .
-RUN pnpm build
+
+ARG BUILD_MODE=production
+RUN pnpm build -- --mode $BUILD_MODE
 
 FROM nginx:alpine
 WORKDIR /usr/share/nginx/html

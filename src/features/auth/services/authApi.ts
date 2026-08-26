@@ -1,23 +1,25 @@
 import { apiSlice } from "../../../app/apiSlice";
-import { loginAPI, type LoginCredentials, type UserAPIType } from "./loginService";
+import type { LoginCredentials, UserAPIType } from "./loginService";
 
 export const authApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     login: builder.mutation<UserAPIType, LoginCredentials>({
-      async queryFn({ email, password }) {
-        try {
-          const userData = await loginAPI(email, password);
-          return { data: userData };
-        } catch (error) {
-          const message = error instanceof Error ? error.message : "Fallo en la autenticación";
-          return {
-            error: {
-              status: "CUSTOM_ERROR",
-              error: message,
-            },
-          };
-        }
-      },
+      query: (credentials) => ({
+        url: "/mah/api/v1/auth/login",
+        method: "POST",
+        body: credentials,
+      }),
+      transformResponse: (data: any): UserAPIType => ({
+        id: data.id ?? 0,
+        username: data.username ?? "",
+        roles: data.roles ?? [],
+        opciones: data.opciones ?? [],
+        distribuidoresPermitidos: data.distribuidoresPermitidos ?? [],
+        accessToken: data.token,
+        refreshToken: data.refresh_token,
+        expiration: data.expiration,
+        tokenType: "Bearer",
+      }),
     }),
   }),
   overrideExisting: false,

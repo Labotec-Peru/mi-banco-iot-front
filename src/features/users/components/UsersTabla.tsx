@@ -3,13 +3,76 @@ import TableComponent, {
     type CustomColumnDef,
     type FilterFieldDef,
 } from "../../../components/ux/TableComponent";
-import { useGetUsersQuery } from "../services/userApi";
-import type { UserItem } from "../services/userApi";
 import { Avatar, Chip } from "@heroui/react";
 
 const PAGE_SIZE_DEFAULT = 15;
 
-export default function UsersTabla() {
+type UserItem = {
+    usu_id: string;
+    usu_usuario: string;
+    usu_nombre: string;
+    usu_correo: string;
+    usu_telefono: string;
+    usu_cargo: string;
+    usu_tipo: string;
+    usu_estado: string;
+};
+
+const MOCK_USERS: UserItem[] = [
+    {
+        usu_id: "1",
+        usu_usuario: "jperez",
+        usu_nombre: "Jorge Pérez",
+        usu_correo: "jperez@empresa.com",
+        usu_telefono: "987654321",
+        usu_cargo: "Supervisor",
+        usu_tipo: "Admin",
+        usu_estado: "Activo",
+    },
+    {
+        usu_id: "2",
+        usu_usuario: "mrios",
+        usu_nombre: "María Ríos",
+        usu_correo: "mrios@empresa.com",
+        usu_telefono: "912345678",
+        usu_cargo: "Analista",
+        usu_tipo: "Estándar",
+        usu_estado: "Activo",
+    },
+    {
+        usu_id: "3",
+        usu_usuario: "lcastro",
+        usu_nombre: "Luis Castro",
+        usu_correo: "lcastro@empresa.com",
+        usu_telefono: "998877665",
+        usu_cargo: "Técnico",
+        usu_tipo: "Estándar",
+        usu_estado: "Inactivo",
+    },
+    {
+        usu_id: "4",
+        usu_usuario: "acruz",
+        usu_nombre: "Ana Cruz",
+        usu_correo: "acruz@empresa.com",
+        usu_telefono: "955443322",
+        usu_cargo: "Coordinadora",
+        usu_tipo: "Admin",
+        usu_estado: "Activo",
+    },
+    {
+        usu_id: "5",
+        usu_usuario: "dvega",
+        usu_nombre: "Diego Vega",
+        usu_correo: "dvega@empresa.com",
+        usu_telefono: "944556677",
+        usu_cargo: "Técnico",
+        usu_tipo: "Estándar",
+        usu_estado: "Desconocido",
+    },
+];
+// ------------------------------------------------------------------------
+
+export default function UsersTablaMock() {
     const [filterValues, setFilterValues] = useState<Record<string, string>>({
         usu_usuario: "",
     });
@@ -20,9 +83,11 @@ export default function UsersTabla() {
         direction: "ascending" | "descending";
     }>({ column: "usu_usuario", direction: "ascending" });
 
-    const { data, isLoading, isFetching } = useGetUsersQuery();
+    // En vez de useGetUsersQuery, usamos el arreglo mock directamente
+    const isLoading = false;
+    const isFetching = false;
+    const allUsers = MOCK_USERS;
 
-    const allUsers = data?.data ?? [];
     const filteredUsers = useMemo(() => {
         return allUsers.filter((user) => {
             const searchTerm = filterValues.usu_usuario?.toLowerCase() || "";
@@ -74,12 +139,16 @@ export default function UsersTabla() {
                         <Avatar
                             size="sm"
                             name={item.usu_nombre}
-                            src={`https://ui-avatars.com/api/?name=${item.usu_nombre}&background=%231e187b&size=32&color=fff&bold=true`}
+                            src={`https://ui-avatars.com/api/?name=${item.usu_nombre}&background=00A64F&size=32&color=fff&bold=true`}
                             className="shrink-0"
                         />
                         <div className="flex flex-col leading-tight">
-                            <span className="font-semibold text-slate-700">{item.usu_nombre}</span>
-                            <span className="text-[11px] text-slate-400">{item.usu_correo}</span>
+                            <span className="font-semibold text-foreground">
+                                {item.usu_nombre}
+                            </span>
+                            <span className="text-[11px] text-default-500">
+                                {item.usu_correo}
+                            </span>
                         </div>
                     </div>
                 ),
@@ -94,8 +163,12 @@ export default function UsersTabla() {
                 render: (item) => (
                     <div className="flex items-center gap-2">
                         <div className="flex flex-col leading-tight">
-                            <span className="font-semibold text-slate-700">{item.usu_usuario}</span>
-                            <span className="text-[11px] text-slate-400">{item.usu_tipo}</span>
+                            <span className="font-semibold text-foreground">
+                                {item.usu_usuario}
+                            </span>
+                            <span className="text-[11px] text-default-500">
+                                {item.usu_tipo}
+                            </span>
                         </div>
                     </div>
                 ),
@@ -113,7 +186,7 @@ export default function UsersTabla() {
                         desconocido: "warning",
                     };
                     return (
-                        <Chip size="sm" variant="solid" color={map[estado] ?? "default"}>
+                        <Chip size="sm" variant="flat" color={map[estado] ?? "default"}>
                             {item.usu_estado}
                         </Chip>
                     );
@@ -129,7 +202,7 @@ export default function UsersTabla() {
 
     return (
         <TableComponent
-            data={paginatedUsers}  
+            data={paginatedUsers}
             columns={columns}
             idField="usu_id"
             filters={filters}
@@ -146,7 +219,7 @@ export default function UsersTabla() {
             }}
             page={page}
             pageSize={pageSize}
-            totalRegistros={totalRegistros}  
+            totalRegistros={totalRegistros}
             onPageChange={setPage}
             onPageSizeChange={(size) => {
                 setPageSize(size);

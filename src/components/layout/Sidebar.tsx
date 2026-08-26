@@ -16,6 +16,11 @@ import {
   Translation,
   SpedometerMiddle,
   Widget5,
+  ClipboardList,
+  Box,
+  FolderFavouriteBookmark,
+  FolderPathConnect,
+  MoveToFolder,
 } from "@solar-icons/react";
 import { Button } from "@heroui/react";
 import { useSelector } from "react-redux";
@@ -51,6 +56,32 @@ const SIDEBAR_SECTIONS: SidebarSection[] = [
         path: "/medidores",
         icon: SpedometerMiddle,
         badge: 2,
+        children: [
+          {
+            codigo: 111,
+            name: "Listado",
+            path: "/medidores",
+            icon: ClipboardList,
+          },
+          {
+            codigo: 112,
+            name: "Modelos",
+            path: "/modelos",
+            icon: Box,
+          },
+          {
+            codigo: 113,
+            name: "Marcas",
+            path: "/marcas",
+            icon: FolderFavouriteBookmark,
+          },
+          {
+            codigo: 113,
+            name: "Tipos",
+            path: "/tipos",
+            icon: MoveToFolder,
+          },
+        ],
       },
       {
         codigo: 3,
@@ -380,7 +411,7 @@ export default function Sidebar() {
                             transition={{ duration: 0.25 }}
                             className="overflow-hidden"
                           >
-                            <div className="relative ml-8.5 mt-1 mb-1 pl-4 border-l border-default-200 [mask-image:linear-gradient(to_bottom,transparent_0%,black_20%,black_80%,transparent_100%)]">
+                            <div className="relative ml-8.5 mt-1 mb-1 pl-4 border-l border-default-200 [mask-image:linear-gradient(to_bottom,transparent_0%,black_10%,black_90%,transparent_100%)]">
                               {item.children!.map((child) => {
                                 const ChildIcon = child.icon;
                                 const childActive = isChildActive(child.path);
@@ -407,7 +438,7 @@ export default function Sidebar() {
                                         : "text-default-500 hover:text-foreground"
                                         }`}
                                     >
-                                      <ChildIcon size={16} />
+                                      <ChildIcon size={16} weight="LineDuotone" />
                                       {child.name}
                                     </span>
                                   </NavLink>
