@@ -22,6 +22,10 @@ pipeline {
         withCredentials([file(credentialsId: 'env-development-labotec', variable: 'ENV_FILE')]) {
             sh 'rm -f .env.development'
             sh 'cp $ENV_FILE .env.development'
+            sh 'echo "--- Variables presentes (solo nombres) ---"'
+            sh 'cut -d"=" -f1 .env.development'
+            sh 'echo "--- Valor de VITE_API ---"'
+            sh 'grep "^VITE_API=" .env.development || echo "❌ VITE_API NO EXISTE en el archivo"'
         }
         echo '🏗️ Construyendo imagen Docker...'
         sh "docker build --memory=6g --network=host --build-arg BUILD_MODE=development -t ${DOCKER_IMAGE} ."
