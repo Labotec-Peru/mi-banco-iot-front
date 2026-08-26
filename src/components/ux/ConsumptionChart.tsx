@@ -15,7 +15,6 @@ import { Card, CardBody, Button, Chip } from '@heroui/react';
 import {
     ArrowUp,
     Water,
-    Database,
     SortHorizontal,
 } from '@solar-icons/react';
 import { boletaDataExample } from '../../config/types';
@@ -63,15 +62,6 @@ const monthlyData = Array.from({ length: 30 }, (_, i) => ({
     volumen: Math.random() * 3600 + 1800,
     promedio: 45,
 }));
-
-const boletaData = {
-    total: 20050,
-    fechaEmision: '24-08-2018',
-    fechaVencimiento: '10-09-2018',
-    lecturaActual: 140,
-    lecturaAnterior: 127,
-    consumo: 13.20,
-};
 
 const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {

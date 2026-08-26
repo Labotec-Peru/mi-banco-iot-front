@@ -89,12 +89,6 @@ const styles = StyleSheet.create({
   barWrapper: {
     alignItems: 'center' as const,
   },
-  bar: (height: number) => ({
-    width: 20,
-    height: height * 10,
-    backgroundColor: '#4A90D9',
-    borderRadius: 2,
-  }),
   barLabel: {
     textAlign: 'center' as const,
     fontSize: 7,
@@ -122,6 +116,13 @@ const styles = StyleSheet.create({
     marginVertical: 8,
     color: '#333',
   },
+});
+
+const getBarStyle = (height: number) => ({
+  width: 20,
+  height: height * 10,
+  backgroundColor: '#4A90D9',
+  borderRadius: 2,
 });
 
 interface PdfBoletaProps {
@@ -184,7 +185,7 @@ const PdfBoleta: React.FC<PdfBoletaProps> = ({ data }) => {
             <Text style={styles.tableCellRight}>Valor Unit.</Text>
             <Text style={styles.tableCellRight}>Total</Text>
           </View>
-          
+
           {data.detalleFacturacion.map((item, index) => (
             <View key={index} style={styles.tableRow}>
               <Text style={styles.tableCell}>{item.concepto}</Text>
@@ -215,7 +216,7 @@ const PdfBoleta: React.FC<PdfBoletaProps> = ({ data }) => {
           <View style={styles.graphBars}>
             {data.consumosUltimos13Meses.map((value, index) => (
               <View key={index} style={styles.barWrapper}>
-                <View style={styles.bar(value)} />
+                <View style={getBarStyle(value)} />
                 <Text style={styles.barLabel}>{value}</Text>
               </View>
             ))}

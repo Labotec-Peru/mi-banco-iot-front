@@ -12,7 +12,6 @@ import {
     Buildings2,
     MapPoint,
     Weigher,
-    InfoCircle
 } from "@solar-icons/react";
 import type { FormField, FormGroup } from "../../../components/ux/ModalComponent";
 

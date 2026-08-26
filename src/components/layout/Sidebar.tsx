@@ -19,7 +19,6 @@ import {
   ClipboardList,
   Box,
   FolderFavouriteBookmark,
-  FolderPathConnect,
   MoveToFolder,
 } from "@solar-icons/react";
 import { Button } from "@heroui/react";
