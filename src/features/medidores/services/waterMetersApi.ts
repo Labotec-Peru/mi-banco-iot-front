@@ -13,7 +13,7 @@ export const waterMeterApi = apiSlice.injectEndpoints({
         getWaterMeters: builder.query<WaterMeterResponse, WaterMeterFilters>({
             query: (filters) => {
                 const params = new URLSearchParams();
-                
+
                 if (filters.serialNumber) params.append('serialNumber', filters.serialNumber);
                 if (filters.podCode) params.append('podCode', filters.podCode);
                 if (filters.clientCompanyId) params.append('clientCompanyId', filters.clientCompanyId.toString());
@@ -28,14 +28,14 @@ export const waterMeterApi = apiSlice.injectEndpoints({
                     method: 'GET',
                 };
             },
-            providesTags: ['WaterMeters'], 
+            providesTags: ['WaterMeters'],
         }),
         getWaterMeterById: builder.query<WaterMeter, number>({
             query: (id) => ({
                 url: `${API}/mms/api/v1/water-meters/${id}`,
                 method: 'GET',
             }),
-            providesTags: (result, error, id) => [{ type: 'WaterMeter', id }], 
+            providesTags: (_result, _error, id) => [{ type: 'WaterMeter', id }],
         }),
         createWaterMeter: builder.mutation<WaterMeter, CreateWaterMeterRequest>({
             query: (data) => ({
@@ -43,7 +43,7 @@ export const waterMeterApi = apiSlice.injectEndpoints({
                 method: 'POST',
                 body: data,
             }),
-            invalidatesTags: ['WaterMeters', 'MyWaterMeters'], 
+            invalidatesTags: ['WaterMeters', 'MyWaterMeters'],
         }),
 
         updateWaterMeter: builder.mutation<WaterMeter, { id: number; data: UpdateWaterMeterRequest }>({
@@ -52,11 +52,11 @@ export const waterMeterApi = apiSlice.injectEndpoints({
                 method: 'PUT',
                 body: data,
             }),
-            invalidatesTags: (result, error, { id }) => [
-                'WaterMeters',         
-                'MyWaterMeters',        
-                { type: 'WaterMeter', id } 
-            ], 
+            invalidatesTags: (_result, _error, { id }) => [
+                'WaterMeters',
+                'MyWaterMeters',
+                { type: 'WaterMeter', id }
+            ],
         }),
 
         deleteWaterMeter: builder.mutation<void, number>({
@@ -64,13 +64,13 @@ export const waterMeterApi = apiSlice.injectEndpoints({
                 url: `${API}/mms/api/v1/water-meters/${id}`,
                 method: 'DELETE',
             }),
-            invalidatesTags: ['WaterMeters', 'MyWaterMeters'], 
+            invalidatesTags: ['WaterMeters', 'MyWaterMeters'],
         }),
 
         getMyWaterMeters: builder.query<WaterMeterResponse, WaterMeterFilters>({
             query: (filters) => {
                 const params = new URLSearchParams();
-                
+
                 if (filters.serialNumber) params.append('serialNumber', filters.serialNumber);
                 if (filters.podCode) params.append('podCode', filters.podCode);
                 if (filters.page !== undefined) params.append('page', filters.page.toString());
@@ -82,7 +82,7 @@ export const waterMeterApi = apiSlice.injectEndpoints({
                     method: 'GET',
                 };
             },
-            providesTags: ['MyWaterMeters'], 
+            providesTags: ['MyWaterMeters'],
         }),
     }),
     overrideExisting: false,
