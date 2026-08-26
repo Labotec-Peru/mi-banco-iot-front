@@ -11,12 +11,16 @@ pipeline {
         HTTP_PORT         = '5094'
     }
     stages {
-        stage('Checkout') {
-            steps { checkout scm }
-        }
+    stage('Clean workspace') {
+        steps { cleanWs() }
+    }
+    stage('Checkout') {
+        steps { checkout scm }
+    }
         stage('Build Docker Image') {
     steps {
         withCredentials([file(credentialsId: 'env-development-labotec', variable: 'ENV_FILE')]) {
+            sh 'rm -f .env.development'
             sh 'cp $ENV_FILE .env.development'
         }
         echo '🏗️ Construyendo imagen Docker...'
