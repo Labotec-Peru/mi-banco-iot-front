@@ -17,15 +17,18 @@ pipeline {
     stage('Checkout') {
         steps { checkout scm }
     }
-        stage('Build Docker Image') {
+       stage('Build Docker Image') {
     steps {
         withCredentials([file(credentialsId: 'env-development-labotec', variable: 'ENV_FILE')]) {
-            sh 'rm -f .env.development'
-            sh 'cp $ENV_FILE .env.development'
-            sh 'echo "--- Variables presentes (solo nombres) ---"'
-            sh 'cut -d"=" -f1 .env.development'
+            // Eliminar archivos .env existentes
+            sh 'rm -f .env .env.development .env.production'
+            
+            sh 'cp $ENV_FILE .env'
+            
+            sh 'echo "--- Variables en .env ---"'
+            sh 'cat .env'
             sh 'echo "--- Valor de VITE_API ---"'
-            sh 'grep "^VITE_API=" .env.development || echo "❌ VITE_API NO EXISTE en el archivo"'
+            sh 'grep "^VITE_API=" .env || echo "❌ VITE_API NO EXISTE"'
         }
         echo '🏗️ Construyendo imagen Docker...'
         sh "docker build --memory=6g --network=host --build-arg BUILD_MODE=development -t ${DOCKER_IMAGE} ."
