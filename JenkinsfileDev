@@ -20,10 +20,10 @@ pipeline {
        stage('Build Docker Image') {
     steps {
         withCredentials([file(credentialsId: 'env-development-labotec', variable: 'ENV_FILE')]) {
-            // Eliminar archivos .env existentes
             sh 'rm -f .env .env.development .env.production'
             
             sh 'cp $ENV_FILE .env'
+            sh 'cp $ENV_FILE .env.development'
             
             sh 'echo "--- Variables en .env ---"'
             sh 'cat .env'
