@@ -1,6 +1,7 @@
 import { PDFDownloadLink } from '@react-pdf/renderer';
 import PdfBoleta from './PdfBoleta';
 import { type BoletaData, boletaDataExample } from '../../config/types';
+import { Button } from '@heroui/react';
 
 interface DescargaPdfProps {
   data?: BoletaData;
@@ -16,7 +17,7 @@ const DescargaPdf: React.FC<DescargaPdfProps> = ({
   loadingText = 'Generando PDF...',
 }) => {
   return (
-    <div className="pdf-download-container">
+    <Button size='sm'  >
       <PDFDownloadLink
         document={<PdfBoleta data={data} />}
         fileName={fileName}
@@ -28,7 +29,7 @@ const DescargaPdf: React.FC<DescargaPdfProps> = ({
           return loading ? loadingText : buttonText;
         }}
       </PDFDownloadLink>
-    </div>
+    </Button>
   );
 };
 

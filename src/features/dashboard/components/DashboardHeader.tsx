@@ -36,14 +36,14 @@ export default function DashboardHeader({
   };
 
   return (
-    <div className="flex items-center justify-between gap-4 px-8 py-5 backdrop-blur-2xl">
-      <div className="min-w-0">
-        <h1 className="text-xl font-bold text-foreground">
+    <div className="flex items-center justify-between gap-4 px-8 py-2 ">
+      <div className="min-w-0 flex gap-2 items-center">
+        <h1 className="text-xl font-bold text-foreground ">
           Bienvenido, {userName}!
         </h1>
 
         <p className="mt-1 text-sm text-default-400">
-          {subtitle}
+          • {subtitle}
         </p>
       </div>
 

@@ -1,20 +1,20 @@
-import { 
+import {
     User,
-    MinimalisticMagnifier, 
-    Phone, 
-    MapArrowDown, 
+    MinimalisticMagnifier,
     Calendar,
-    Buildings,
     Map,
     Hashtag,
-    Global,
     Cpu,
     Buildings2,
     MapPoint,
     Weigher,
+    Box,
+    ToPip,
+    FolderFavouriteBookmark,
+    MoveToFolder,
+    Command,
 } from "@solar-icons/react";
 import type { FormField, FormGroup } from "../../../components/ux/ModalComponent";
-
 
 export interface MedidorFormValues {
     serialNumber: string;
@@ -30,10 +30,10 @@ export interface MedidorFormValues {
     latitude?: number | string;
     longitude?: number | string;
     ubigeoCode: string;
+    connectionType: string
     initialValue: number;
     installationDate: string;
 }
-
 
 export const getMedidorFormFields = (options?: {
     meterTypes?: { value: string; label: string }[];
@@ -53,7 +53,15 @@ export const getMedidorFormFields = (options?: {
             colSpan: 2,
             startContent: <User size={16} className="text-default-400" />,
             group: "Información del Medidor",
+            validation: {
+                required: "El número de serie es requerido",
+                minLength: {
+                    value: 3,
+                    message: "El número de serie debe tener al menos 3 caracteres",
+                },
+            },
         },
+        
         {
             name: "podCode",
             label: "Código POD",
@@ -64,16 +72,16 @@ export const getMedidorFormFields = (options?: {
             startContent: <MinimalisticMagnifier size={16} className="text-default-400" />,
             group: "Información del Medidor",
         },
-        {
-            name: "imei",
-            label: "IMEI",
-            type: "text",
-            placeholder: "Ingrese el IMEI",
-            required: false,
-            colSpan: 1,
-            startContent: <Phone size={16} className="text-default-400" />,
-            group: "Información del Medidor",
-        },
+        // {
+        //     name: "imei",
+        //     label: "IMEI",
+        //     type: "text",
+        //     placeholder: "Ingrese el IMEI",
+        //     required: false,
+        //     colSpan: 1,
+        //     startContent: <Phone size={16} className="text-default-400" />,
+        //     group: "Información del Medidor",
+        // },
         {
             name: "meterTypeId",
             label: "Tipo de Medidor",
@@ -81,13 +89,12 @@ export const getMedidorFormFields = (options?: {
             placeholder: "Seleccione el tipo",
             required: true,
             colSpan: 1,
-            options: options?.meterTypes || [
-                { value: "1", label: "Agua" },
-                { value: "2", label: "Gas" },
-                { value: "3", label: "Electricidad" },
-            ],
-            startContent: <MapArrowDown size={16} className="text-default-400" />,
+            options: options?.meterTypes,
+            startContent: <MoveToFolder size={16} className="text-default-400" />,
             group: "Información del Medidor",
+            validation: {
+                required: "El tipo de medidor es requerido",
+            },
         },
         {
             name: "meterBrandId",
@@ -96,13 +103,12 @@ export const getMedidorFormFields = (options?: {
             placeholder: "Seleccione la marca",
             required: true,
             colSpan: 1,
-            options: options?.brands || [
-                { value: "1", label: "Marca A" },
-                { value: "2", label: "Marca B" },
-                { value: "3", label: "Marca C" },
-            ],
-            startContent: <Buildings size={16} className="text-default-400" />,
+            options: options?.brands,
+            startContent: <FolderFavouriteBookmark size={16} className="text-default-400" />,
             group: "Información del Medidor",
+            validation: {
+                required: "La marca es requerida",
+            },
         },
         {
             name: "meterModelId",
@@ -111,13 +117,12 @@ export const getMedidorFormFields = (options?: {
             placeholder: "Seleccione el modelo",
             required: true,
             colSpan: 1,
-            options: options?.models || [
-                { value: "1", label: "Modelo X" },
-                { value: "2", label: "Modelo Y" },
-                { value: "3", label: "Modelo Z" },
-            ],
-            startContent: <Hashtag size={16} className="text-default-400" />,
+            options: options?.models,
+            startContent: <Box size={16} className="text-default-400" />,
             group: "Información del Medidor",
+            validation: {
+                required: "El modelo es requerido",
+            },
         },
         {
             name: "networkTechnologyId",
@@ -127,14 +132,29 @@ export const getMedidorFormFields = (options?: {
             required: false,
             colSpan: 1,
             options: options?.technologies || [
+                { value: "", label: "Selecciona una tecnología..." },
                 { value: "1", label: "LTE" },
                 { value: "2", label: "NB-IoT" },
                 { value: "3", label: "LoRa" },
             ],
-            startContent: <Global size={16} className="text-default-400" />,
+            startContent: <Command size={16} className="text-default-400" />,
             group: "Información del Medidor",
         },
-
+        {
+            name: "connectionType",
+            label: "Tipo de Conexión",
+            type: "select",
+            placeholder: "Seleccione el tipo de conexión",
+            required: false,
+            colSpan: 1,
+            startContent: <ToPip size={16} className="text-default-400" />,
+            group: "Información del Medidor",
+            options: [
+                { value: "UNDEFINED", label: "No definido" },
+                { value: "INTEGRATED", label: "Integrado" },
+                { value: "EXTERNAL_SENSOR", label: "Sensor externo" }
+            ]
+        },
         {
             name: "clientCompanyId",
             label: "Empresa Cliente",
@@ -143,12 +163,13 @@ export const getMedidorFormFields = (options?: {
             required: true,
             colSpan: 1,
             options: options?.clientCompanies || [
-                { value: "1", label: "Empresa A" },
-                { value: "2", label: "Empresa B" },
-                { value: "3", label: "Empresa C" },
+                { value: "", label: "Selecciona una empresa cliente..." },
             ],
             startContent: <Buildings2 size={16} className="text-default-400" />,
             group: "Empresas",
+            validation: {
+                required: "La empresa cliente es requerida",
+            },
         },
         {
             name: "providerCompanyId",
@@ -158,16 +179,17 @@ export const getMedidorFormFields = (options?: {
             required: true,
             colSpan: 1,
             options: options?.providerCompanies || [
-                { value: "1", label: "Proveedor A" },
-                { value: "2", label: "Proveedor B" },
-                { value: "3", label: "Proveedor C" },
+                { value: "", label: "Selecciona una empresa proveedora..." },
             ],
             startContent: <Buildings2 size={16} className="text-default-400" />,
             group: "Empresas",
+            validation: {
+                required: "La empresa proveedora es requerida",
+            },
         },
         {
             name: "installationAddress",
-            label: "Dirección de Instalación",            
+            label: "Dirección de Instalación",
             type: "textarea",
             placeholder: "Ingrese la dirección completa",
             required: false,
@@ -180,6 +202,7 @@ export const getMedidorFormFields = (options?: {
             label: "Latitud",
             type: "number",
             placeholder: "-12.0464",
+            required: false,
             colSpan: 1,
             startContent: <MapPoint size={16} className="text-default-400" />,
             group: "Ubicación",
@@ -189,6 +212,7 @@ export const getMedidorFormFields = (options?: {
             label: "Longitud",
             type: "number",
             placeholder: "-77.0428",
+            required: false,
             colSpan: 1,
             startContent: <MapPoint size={16} className="text-default-400" />,
             group: "Ubicación",
@@ -198,6 +222,7 @@ export const getMedidorFormFields = (options?: {
             label: "Código Ubigeo",
             type: "text",
             placeholder: "150101",
+            required: false,
             colSpan: 2,
             startContent: <Map size={16} className="text-default-400" />,
             group: "Ubicación",
@@ -208,9 +233,16 @@ export const getMedidorFormFields = (options?: {
             label: "Valor Inicial (L)",
             type: "number",
             placeholder: "0",
+            required: false,
             colSpan: 1,
             startContent: <Hashtag size={16} className="text-default-400" />,
             group: "Instalación",
+            validation: {
+                min: {
+                    value: 0,
+                    message: "El valor inicial debe ser mayor o igual a 0",
+                },
+            },
         },
         {
             name: "installationDate",
@@ -224,11 +256,10 @@ export const getMedidorFormFields = (options?: {
     ];
 };
 
-
 export const getMedidorFormGroups = (): FormGroup[] => [
     {
         title: "Información del Medidor",
-        icon: <Cpu size={18}  weight="Bold" />,
+        icon: <Cpu size={18} weight="Bold" />,
         description: "Datos técnicos del medidor",
         fields: [
             "serialNumber",
@@ -242,24 +273,23 @@ export const getMedidorFormGroups = (): FormGroup[] => [
     },
     {
         title: "Empresas",
-        icon: <Buildings2 size={18}  weight="Bold"/>,
+        icon: <Buildings2 size={18} weight="Bold" />,
         description: "Empresas cliente y proveedora",
         fields: ["clientCompanyId", "providerCompanyId"],
     },
     {
         title: "Ubicación",
-        icon: <MapPoint size={18}  weight="Bold"/>,
+        icon: <MapPoint size={18} weight="Bold" />,
         description: "Datos de ubicación del medidor",
         fields: ["installationAddress", "latitude", "longitude", "ubigeoCode"],
     },
     {
         title: "Instalación",
-        icon: <Weigher size={18}  weight="Bold"/>,
+        icon: <Weigher size={18} weight="Bold" />,
         description: "Datos de instalación del medidor",
         fields: ["initialValue", "installationDate"],
     },
 ];
-
 
 export const getMedidorInitialValues = (): MedidorFormValues => ({
     serialNumber: "",
@@ -277,25 +307,26 @@ export const getMedidorInitialValues = (): MedidorFormValues => ({
     ubigeoCode: "",
     initialValue: 0,
     installationDate: new Date().toISOString().split('T')[0],
+    connectionType: ""
 });
-
 
 export const mapMedidorToFormValues = (medidor: any): MedidorFormValues => ({
     serialNumber: medidor.numeroSerie || "",
     podCode: medidor.codigoPod || "",
     imei: medidor.imei || "",
-    meterTypeId: medidor.tipoMedidor || "",
-    meterBrandId: medidor.marca || "",
-    meterModelId: medidor.modelo || "",
-    networkTechnologyId: medidor.tecnologiaRed || "",
-    clientCompanyId: medidor.empresaCliente || "",
-    providerCompanyId: medidor.empresaProveedora || "",
-    installationAddress: medidor.direccion || "",
-    latitude: medidor.latitud || "",
-    longitude: medidor.longitud || "",
+    meterTypeId: String(medidor.meterTypeId || medidor.tipoMedidor || ""),
+    meterBrandId: String(medidor.meterBrandId || medidor.marca || ""),
+    meterModelId: String(medidor.meterModelId || medidor.modelo || ""),
+    networkTechnologyId: String(medidor.networkTechnologyId || medidor.tecnologiaRed || ""),
+    clientCompanyId: String(medidor.clientCompanyId || medidor.empresaCliente || ""),
+    providerCompanyId: String(medidor.providerCompanyId || medidor.empresaProveedora || ""),
+    installationAddress: medidor.installationAddress || medidor.direccion || "",
+    latitude: medidor.latitude || medidor.latitud || "",
+    longitude: medidor.longitude || medidor.longitud || "",
     ubigeoCode: medidor.ubigeoCode || "",
-    initialValue: medidor.valorInicial || 0,
-    installationDate: medidor.fechaInstalacion 
-        ? new Date(medidor.fechaInstalacion).toISOString().split('T')[0]
+    initialValue: medidor.initialValue || medidor.valorInicial || 0,
+    installationDate: medidor.installationDate || medidor.fechaInstalacion
+        ? new Date(medidor.installationDate || medidor.fechaInstalacion).toISOString().split('T')[0]
         : new Date().toISOString().split('T')[0],
+    connectionType: medidor.connectionType || ""
 });

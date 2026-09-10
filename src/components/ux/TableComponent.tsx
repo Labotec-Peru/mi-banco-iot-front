@@ -1,8 +1,12 @@
 import type { ReactNode } from "react";
 import { Input, Select, SelectItem, Button, Pagination, DateRangePicker, DatePicker } from "@heroui/react";
 import type { RangeValue, DateValue } from "@heroui/react";
-import { Magnifer, AltArrowDown, AltArrowUp, Broom } from "@solar-icons/react";
+import { Magnifer, AltArrowDown, AltArrowUp, Broom, Widget, ListArrowDown, GraphDownNew } from "@solar-icons/react";
 import { ThinkingOrb } from "thinking-orbs";
+import CustomDateRangePicker from "./CustomDateRangePicker";
+import { Chart2 } from "@solar-icons/react/ssr";
+
+export type ViewMode = "table" | "cards" | "chart";
 
 export interface CustomColumnDef<T> {
   key: string;
@@ -13,6 +17,7 @@ export interface CustomColumnDef<T> {
   align?: "start" | "center" | "end";
   render?: (item: T) => ReactNode;
 }
+
 
 export interface ColumnGroupDef {
   label: string;
@@ -44,21 +49,21 @@ export interface CustomTableProps<T extends Record<string, any>> {
     column: string;
     direction: "ascending" | "descending";
   }) => void;
-
   page: number;
   pageSize: number;
   totalRegistros: number;
   pageSizeOptions?: number[];
   onPageChange: (page: number) => void;
   onPageSizeChange: (size: number) => void;
-
   isLoading?: boolean;
   maxBodyHeight?: string;
-  viewMode?: "table" | "cards";
   cardView?: (item: T) => ReactNode;
-
+  chartComponent?: ReactNode;
   dateRangeValue?: RangeValue<DateValue> | null;
   onDateRangeChange?: (range: RangeValue<DateValue> | null) => void;
+  viewMode?: ViewMode;
+  onViewModeChange?: (mode: ViewMode) => void;
+  availableViews?: ViewMode[];
 }
 
 const GROUP_ROW_HEIGHT = 34;
@@ -94,12 +99,15 @@ export default function TableComponent<T extends Record<string, any>>({
   onPageChange,
   onPageSizeChange,
   isLoading,
-  maxBodyHeight = "560px",
+  maxBodyHeight = "700px",
   viewMode = "table",
+  onViewModeChange,
   cardView,
   dateRangeValue,
   onDateRangeChange,
+  chartComponent,
   dateValue,
+  availableViews = ["table", "cards", "chart"],
   onDateChange,
 }: CustomTableProps<T>) {
   const totalPages = Math.max(1, Math.ceil(totalRegistros / pageSize));
@@ -127,6 +135,11 @@ export default function TableComponent<T extends Record<string, any>>({
   };
 
   const bodyMinHeight = `min(${maxBodyHeight}, 120px)`;
+
+
+  const showTableView = availableViews.includes("table");
+  const showCardsView = availableViews.includes("cards") && !!cardView;
+  const showChartView = availableViews.includes("chart") && !!chartComponent;
 
   return (
     <div className="bg-background rounded-2xl shadow-[0_10px_30px_rgba(15,23,42,0.08)] border border-zinc-200/70 dark:border-zinc-700/70 w-full max-w-full flex flex-col">
@@ -157,15 +170,12 @@ export default function TableComponent<T extends Record<string, any>>({
 
             if (f.type === "dateRange") {
               return (
-                <DateRangePicker
+                <CustomDateRangePicker
                   key={f.key}
-                  size="md"
-                  radius="md"
-                  className="w-72"
-                  aria-label={f.placeholder ?? "Rango de fechas"}
                   value={dateRangeValue as any}
                   onChange={onDateRangeChange as any}
-                  granularity="day"
+                  placeholder={f.placeholder ?? "Rango de fechas"}
+                  className="w-66"
                 />
               );
             }
@@ -202,15 +212,61 @@ export default function TableComponent<T extends Record<string, any>>({
               Limpiar
             </Button>
           )}
-
           <div className="flex-1" />
           {headerActions}
+          <div className="flex items-center gap-1 bg-zinc-100 dark:bg-zinc-800 rounded-lg p-1">
+            {showTableView && (
+              <Button
+                size="sm"
+                variant={viewMode === "table" ? "solid" : "light"}
+                color={viewMode === "table" ? "primary" : "default"}
+                isIconOnly
+                onPress={() => onViewModeChange?.("table")}
+                className="min-w-8 h-8"
+                title="Vista tabla"
+              >
+                <Widget size={16} />
+              </Button>
+            )}
+
+            {showCardsView && (
+              <Button
+                size="sm"
+                variant={viewMode === "cards" ? "solid" : "light"}
+                color={viewMode === "cards" ? "primary" : "default"}
+                isIconOnly
+                onPress={() => onViewModeChange?.("cards")}
+                className="min-w-8 h-8"
+                title="Vista cards"
+              >
+                <ListArrowDown size={16} />
+              </Button>
+            )}
+
+            {showChartView && (
+              <Button
+                size="sm"
+                variant={viewMode === "chart" ? "solid" : "light"}
+                color={viewMode === "chart" ? "secondary" : "default"}
+                isIconOnly
+                onPress={() => onViewModeChange?.("chart")}
+                className="min-w-8 h-8"
+                title="Vista gráfica"
+              >
+                <Chart2 size={16} />
+              </Button>
+            )}
+          </div>
         </div>
       )}
 
       <div className="w-full overflow-auto" style={{ maxHeight: maxBodyHeight }}>
         {isLoading ? (
           <LoadingOverlay minHeight={bodyMinHeight} />
+        ) : viewMode === "chart" && chartComponent ? (
+          <div className="p-4">
+            {chartComponent}
+          </div>
         ) : viewMode === "cards" && cardView ? (
           <div className="grid grid-cols-1 gap-4 p-4 md:grid-cols-2 xl:grid-cols-3">
             {data.length === 0 ? (

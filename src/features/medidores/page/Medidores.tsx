@@ -3,11 +3,9 @@ import { Button } from "@heroui/react";
 import { 
     AddCircle, 
     FileDownload, 
-    Widget, 
-    ListArrowDown 
 } from "@solar-icons/react";
 import PageContainer from "../../../layouts/PageContainer";
-import TableComponent from "../../../components/ux/TableComponent";
+import TableComponent, { type ViewMode } from "../../../components/ux/TableComponent";
 import type { Medidor } from "../types/medidor";
 import MedidorCard from "../components/MedidorCard";
 import StatsRow from "../../dashboard/components/StatsRow";
@@ -17,8 +15,6 @@ import { mapApiToMedidor } from "../services/medidorMapper";
 import { getMedidorColumns } from "../components/MedidorColumns";
 import { getMedidorFilters } from "../config/medidorFilters";
 import { exportMedidoresToExcel } from "../config/medidorExport";
-
-type ViewMode = "table" | "cards";
 
 export default function Medidores() {
     const [viewMode, setViewMode] = useState<ViewMode>("table");
@@ -82,7 +78,6 @@ export default function Medidores() {
         const start = (page - 1) * pageSize;
         return filteredSorted.slice(start, start + pageSize);
     }, [filteredSorted, page, pageSize]);
-
 
     const handleFilterChange = (key: string, value: string) => {
         setFilterValues((prev) => ({ ...prev, [key]: value }));
@@ -151,8 +146,6 @@ export default function Medidores() {
         exportMedidoresToExcel(filteredSorted);
     };
 
-
-
     if (error) {
         return (
             <PageContainer>
@@ -197,28 +190,6 @@ export default function Medidores() {
                             >
                                 Exportar Excel
                             </Button>
-                            <div className="flex items-center gap-1 bg-zinc-100 dark:bg-zinc-800 rounded-lg p-1">
-                                <Button
-                                    size="sm"
-                                    variant={viewMode === "table" ? "solid" : "light"}
-                                    color={viewMode === "table" ? "primary" : "default"}
-                                    isIconOnly
-                                    onPress={() => setViewMode("table")}
-                                    className="min-w-8 h-8"
-                                >
-                                    <Widget size={16} />
-                                </Button>
-                                <Button
-                                    size="sm"
-                                    variant={viewMode === "cards" ? "solid" : "light"}
-                                    color={viewMode === "cards" ? "primary" : "default"}
-                                    isIconOnly
-                                    onPress={() => setViewMode("cards")}
-                                    className="min-w-8 h-8"
-                                >
-                                    <ListArrowDown size={16} />
-                                </Button>
-                            </div>
                         </div>
                     }
                     sortDescriptor={sortDescriptor}
@@ -232,6 +203,8 @@ export default function Medidores() {
                         setPage(1);
                     }}
                     viewMode={viewMode}
+                    onViewModeChange={setViewMode}
+                    availableViews={["table", "cards"]}
                     cardView={(medidor) => (
                         <MedidorCard
                             key={medidor.id}

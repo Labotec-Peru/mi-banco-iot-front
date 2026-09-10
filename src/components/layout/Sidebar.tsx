@@ -13,13 +13,16 @@ import {
   UsersGroupRounded,
   ShieldUser,
   LockKeyhole,
-  Translation,
-  SpedometerMiddle,
   Widget5,
   ClipboardList,
   Box,
   FolderFavouriteBookmark,
   MoveToFolder,
+  TrafficEconomy,
+  Screencast,
+  City,
+  Command,
+  Folder,
 } from "@solar-icons/react";
 import { Button } from "@heroui/react";
 import { useSelector } from "react-redux";
@@ -47,13 +50,13 @@ const SIDEBAR_SECTIONS: SidebarSection[] = [
         codigo: 1,
         name: "Inicio",
         path: "/dashboard",
-        icon: Widget5,       
+        icon: Widget5,
       },
       {
         codigo: 2,
         name: "Medidores",
         path: "/medidores",
-        icon: SpedometerMiddle,
+        icon: TrafficEconomy,
         badge: 2,
         children: [
           {
@@ -86,10 +89,18 @@ const SIDEBAR_SECTIONS: SidebarSection[] = [
         codigo: 3,
         name: "Sensores",
         path: "/sensores",
-        icon: Translation,
+        icon: Screencast,
+        children: [
+          {
+            codigo: 413413,
+            name: "Listado",
+            path: "/sensores",
+            icon: ClipboardList,
+          },          
+        ],
       },
       {
-        codigo: 4,
+        codigo: 4234,
         name: "Lecturas",
         path: "/graph",
         icon: ChartSquare,
@@ -103,7 +114,7 @@ const SIDEBAR_SECTIONS: SidebarSection[] = [
         badge: 4,
       },
     ],
-  },  
+  },
 
   {
     title: "Herramientas",
@@ -113,15 +124,22 @@ const SIDEBAR_SECTIONS: SidebarSection[] = [
         name: "Comandos",
         path: "/command",
         icon: Programming,
-      },      
+      },
     ],
   },
 
   {
+
     title: "Administración",
     items: [
       {
-        codigo: 11,
+        codigo: 234,
+        name: "Empresas",
+        path: "/companies",
+        icon: City,
+      },
+      {
+        codigo: 2342,
         name: "Usuarios",
         path: "/usuarios",
         icon: UsersGroupRounded,
@@ -145,9 +163,21 @@ const SIDEBAR_SECTIONS: SidebarSection[] = [
             icon: LockKeyhole,
           },
         ],
+      },      
+      {
+        codigo: 134,
+        name: "Red",
+        path: "/network",
+        icon: Command,
       },
       {
-        codigo: 12,
+        codigo: 1134,
+        name: "Archivos",
+        path: "/attachmen",
+        icon: Folder,
+      },
+      {
+        codigo: 2324,
         name: "Configuración",
         path: "/configuracion",
         icon: SettingsMinimalistic,
@@ -428,7 +458,7 @@ export default function Sidebar() {
                                         layoutId="sidebar-active-child-pill"
                                         transition={{ type: "spring", stiffness: 350, damping: 30 }}
                                         className="absolute inset-0 rounded-full  shadow-sm z-0"
-                                        
+
                                       />
                                     )}
                                     <span

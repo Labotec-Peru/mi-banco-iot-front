@@ -1,5 +1,3 @@
-// src/features/medidores/config/medidorColumns.tsx
-
 import { Chip, Tooltip, Button } from "@heroui/react";
 import { PenNewSquare, TrashBinTrash } from "@solar-icons/react";
 import type { CustomColumnDef } from "../../../components/ux/TableComponent";

@@ -1,6 +1,7 @@
 import { ESTADO_FILTER_OPTIONS } from "./medidorStatus";
+import type { FilterFieldDef } from "@/components/ux/TableComponent";
 
-export const getMedidorFilters = () => [
+export const getMedidorFilters = (): FilterFieldDef[] => [
     { 
         key: "search", 
         type: "text" as const, 

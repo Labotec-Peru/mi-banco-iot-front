@@ -35,6 +35,19 @@ export interface FormField {
     description?: string;
     className?: string;
     group?: string;
+    disabled?: boolean;
+    rows?: number;
+    validation?: ValidationRule;
+}
+
+export interface ValidationRule {
+    required?: string | boolean;
+    minLength?: { value: number; message: string };
+    maxLength?: { value: number; message: string };
+    pattern?: { value: RegExp; message: string };
+    min?: { value: number; message: string };
+    max?: { value: number; message: string };
+    validate?: (value: any) => boolean | string;
 }
 
 export interface FormGroup {
@@ -87,7 +100,6 @@ const renderField = ({ field, form, handleChange, errors }: RenderFieldProps) =>
                     }
                     onSelectionChange={(keys: Selection) => {
                         const values = Array.from(keys as Set<string>);
-
                         handleChange(
                             field.name,
                             field.multiple ? values : values[0]
@@ -122,6 +134,7 @@ const renderField = ({ field, form, handleChange, errors }: RenderFieldProps) =>
                     className={field.className}
                     startContent={field.startContent}
                     endContent={field.endContent}
+                    rows={field.rows || 3}
                 />
             );
 
@@ -221,8 +234,19 @@ export default function ModalComponent({
     };
 
     const handleSubmit = async () => {
+
+        const formattedForm = { ...form };
+
+        fields.forEach(field => {
+            if (field.type === 'date' && formattedForm[field.name]) {
+                const dateValue = formattedForm[field.name];
+                if (typeof dateValue === 'string' && dateValue.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                    formattedForm[field.name] = new Date(dateValue + 'T00:00:00.000Z').toISOString();
+                }
+            }
+        });
         try {
-            await onSubmit(form);
+            await onSubmit(formattedForm);
             onOpenChange(false);
             setErrors({});
         } catch (err: any) {
@@ -247,7 +271,6 @@ export default function ModalComponent({
         onOpenChange(false);
     };
 
-    // Agrupar campos por grupo
     const groupedFields = useMemo(() => {
         if (groups.length === 0) {
             return { ungrouped: fields };
@@ -257,12 +280,10 @@ export default function ModalComponent({
             ungrouped: [],
         };
 
-        // Inicializar grupos
         groups.forEach(group => {
             result[group.title] = [];
         });
 
-        // Asignar campos a grupos
         fields.forEach(field => {
             if (field.group) {
                 const group = groups.find(g => g.title === field.group);
@@ -285,7 +306,7 @@ export default function ModalComponent({
             <div key={group.title} className="mb-6 last:mb-0">
                 <div className="flex items-center gap-2.5 pb-2.5 mb-4 border-b border-default-100">
                     {group.icon && (
-                        <div className="flex items-center justify-center w-7 h-7 rounded-lg bg-primary text-white shrink-0">
+                        <div className="flex items-center justify-center w-7 h-7 rounded-lg bg-primary text-white dark:text-background shrink-0">
                             {group.icon}
                         </div>
                     )}

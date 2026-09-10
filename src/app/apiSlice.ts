@@ -1,5 +1,3 @@
-// app/apiSlice.ts
-
 import { createApi, fetchBaseQuery, type BaseQueryApi, type FetchArgs } from '@reduxjs/toolkit/query/react';
 import { jwtDecode } from 'jwt-decode';
 import { API } from '../config/env';
@@ -67,7 +65,7 @@ const baseQueryWithInterceptor = async (args: string | FetchArgs, api: BaseQuery
       console.warn("Servidor rechazó el token (401)");
       localStorage.removeItem("token");
       api.dispatch(logout());
-      
+
       addToast({
         title: "Sesión expirada",
         description: "Vuelve a iniciar sesión",
@@ -110,11 +108,38 @@ export const apiSlice = createApi({
   reducerPath: 'api',
   baseQuery: baseQueryWithInterceptor,
   tagTypes: [
-    'User', 
-    'WaterMeters',      
-    'MyWaterMeters',    
-    'WaterMeter'        
-  ] as const, 
+    'User',
+    'WaterMeters',
+    'MyWaterMeters',
+    'WaterMeter',
+    "MeterModels",
+    "MeterModel",
+    "MeterBrands",
+    "MeterBrand",
+    "MeterTypes",
+    "MeterType",
+    "Companies",
+    "Company",
+    "MyCompany",
+    "AvailableCompanies",
+    "NetworkTechnologies",
+    "NetworkTechnology",
+    "Sensors",
+    "Sensor",
+    "Reading",
+    "Readings",
+    "Commands",
+    "Command",
+    "SensorInstallations",
+    "SensorInstallationsHistory",
+    "SensorInstallationHistory",
+    "WaterMeterInstallation",
+    "WaterMeterInstallationHistory",
+    "ConfigAlerts",
+    "ConfigAlert",
+    "Attachments",
+    
+  ] as const,
   endpoints: () => ({}),
 });
 

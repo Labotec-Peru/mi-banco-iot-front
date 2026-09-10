@@ -66,6 +66,7 @@ export interface CreateWaterMeterRequest {
     ubigeoCode: string;
     initialValue: number;
     installationDate: string;
+    connectionType: string    
 }
 
 export interface UpdateWaterMeterRequest {
@@ -84,5 +85,6 @@ export interface UpdateWaterMeterRequest {
     ubigeoCode?: string;
     initialValue?: number;
     installationDate?: string;
+    connectionType: string;
     status?: 'ACTIVE' | 'INACTIVE' | 'MAINTENANCE' | 'DISABLED';
 }
