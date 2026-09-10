@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
-import { Input, Select, SelectItem, Button, Pagination, DateRangePicker, DatePicker } from "@heroui/react";
+import { Input, Select, SelectItem, Button, Pagination, DatePicker } from "@heroui/react";
 import type { RangeValue, DateValue } from "@heroui/react";
-import { Magnifer, AltArrowDown, AltArrowUp, Broom, Widget, ListArrowDown, GraphDownNew } from "@solar-icons/react";
+import { Magnifer, AltArrowDown, AltArrowUp, Broom, Widget, ListArrowDown } from "@solar-icons/react";
 import { ThinkingOrb } from "thinking-orbs";
 import CustomDateRangePicker from "./CustomDateRangePicker";
 import { Chart2 } from "@solar-icons/react/ssr";

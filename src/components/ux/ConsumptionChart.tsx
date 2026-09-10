@@ -17,8 +17,6 @@ import {
     Water,
     SortHorizontal,
 } from "@solar-icons/react";
-import { boletaDataExample } from "../../config/types";
-import DescargaPdf from "./DescargaPdf";
 import type { ChartDataPoint } from "@/features/graph/types/readingApi";
 
 interface FlowVolumeChartProps {
@@ -251,13 +249,7 @@ export default function FlowVolumeChart({
                                 startContent={<ArrowUp className="w-3 h-3" weight="Bold" />}
                             >
                                 Volumen
-                            </Button>
-                            {/* <DescargaPdf
-                                data={boletaDataExample}
-                                fileName="boleta-agua.pdf"
-                                buttonText="Boleta"
-                                loadingText="Generando..."
-                            /> */}
+                            </Button>                          
                         </div>
                     </div>
                 </div>

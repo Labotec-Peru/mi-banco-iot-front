@@ -52,9 +52,7 @@ export default function Lecturas() {
 
 
     const {
-        readings: chartReadings,
-        isLoading: isChartLoading
-    } = useChartReadings({
+        readings: chartReadings } = useChartReadings({
         waterMeterId: filterValues.waterMeterId
             ? Number(filterValues.waterMeterId)
             : undefined,

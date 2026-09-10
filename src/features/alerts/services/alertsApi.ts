@@ -1,8 +1,5 @@
-// services/alertsApi.ts
 import { apiSlice } from "../../../app/apiSlice";
 import { API } from "../../../config/env";
-
-// ==================== TIPOS ====================
 
 export interface ConfigAlert {
     id: number;
