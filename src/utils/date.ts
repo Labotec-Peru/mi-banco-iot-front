@@ -9,6 +9,7 @@ export const formatDate = (
         day: "2-digit",
         month: "2-digit",
         year: "numeric",
+        timeZone: "UTC",  
         ...(showTime && {
             hour: "2-digit",
             minute: "2-digit",
@@ -67,6 +68,6 @@ export const startOfDayInstant = (date: Date): string => {
 
 export const endOfDayInstant = (date: Date): string => {
     const d = new Date(date);
-    d.setUTCHours(23, 59, 59, 0); 
+    d.setUTCHours(23, 59, 59, 0);
     return d.toISOString().replace(/\.\d{3}Z$/, "Z");
 };
