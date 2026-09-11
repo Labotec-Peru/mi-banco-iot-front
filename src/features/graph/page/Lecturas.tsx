@@ -14,7 +14,7 @@ import { useReadings } from "../hooks/useReadings";
 import PageContainer from "@/layouts/PageContainer";
 import StatsRow from "@/features/dashboard/components/StatsRow";
 import CustomDateRangePicker from "@/components/ux/CustomDateRangePicker";
-import { Magnifer, Refresh } from "@solar-icons/react";
+import { Refresh } from "@solar-icons/react";
 
 export default function Lecturas() {
     const [filterValues, setFilterValues] = useState<Record<string, string>>({});
@@ -104,8 +104,8 @@ export default function Lecturas() {
     };
 
     const handleRefresh = () => {
-    setAppliedFilters({ ...appliedFilters });
-};
+        setAppliedFilters({ ...appliedFilters });
+    };
 
     const handleClearFilters = () => {
         const defaultMeterId = waterMeters.length > 0
