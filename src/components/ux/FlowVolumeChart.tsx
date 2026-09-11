@@ -23,7 +23,6 @@ interface FlowVolumeChartProps {
     data?: ChartDataPoint[];
     title?: string;
 }
-
 const CustomTooltip = ({ active, payload, label }: any) => {
     if (!active || !payload || !payload.length) return null;
 
@@ -37,16 +36,11 @@ const CustomTooltip = ({ active, payload, label }: any) => {
     const volumen = getValue("volumen");
     const promedio = getValue("promedio");
 
-    const fullDate = payload[0]?.payload?.fullDate;
-    const dateLabel = fullDate
-        ? new Date(fullDate).toLocaleString("es-ES", {
-            day: "2-digit",
-            month: "2-digit",
-            year: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
-        })
-        : label;
+    const raw = payload[0]?.payload?.fullDate ?? label;
+    const dateLabel = String(raw)
+        .replace("T", " ")
+        .replace("Z", "")
+        .slice(0, 16);
 
     return (
         <div className="bg-white dark:bg-default-100 p-3 rounded-lg shadow-lg min-w-[200px]">
@@ -58,7 +52,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
                         <span className="w-2 h-2 rounded-full bg-primary" />
                         <span className="text-default-600">Flujo:</span>
                     </div>
-                    <span className="font-semibold">{flujo.toFixed(2)} mL/h</span>
+                    <span className="font-semibold">{flujo.toFixed(2)}</span>
                 </div>
             )}
 
@@ -78,7 +72,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
                         <span className="w-2 h-2 rounded-full bg-default-400" />
                         <span className="text-default-600">Promedio:</span>
                     </div>
-                    <span className="font-semibold">{promedio.toFixed(2)} mL/h</span>
+                    <span className="font-semibold">{promedio.toFixed(2)}</span>
                 </div>
             )}
         </div>
@@ -142,6 +136,10 @@ export default function FlowVolumeChart({
                             axisLine={false}
                             interval="preserveStartEnd"
                             minTickGap={60}
+                            tickFormatter={(value) => {
+                                const match = String(value).match(/T(\d{2}:\d{2})/);
+                                return match ? match[1] : String(value);
+                            }}
                         />
 
                         <YAxis
@@ -149,7 +147,11 @@ export default function FlowVolumeChart({
                             tick={{ fontSize: 10, fill: color }}
                             tickLine={false}
                             axisLine={false}
-                            tickFormatter={(value) => `${value}`}
+                            tickFormatter={(value) => {
+                                const s = String(value);
+                                const match = s.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}:\d{2})/);
+                                return match ? `${match[3]}/${match[2]} ${match[4]}` : s;
+                            }}
                             label={{
                                 value: label,
                                 angle: -90,

@@ -45,16 +45,12 @@ export function transformReadingsToChartData(readings: any[]): ChartDataPoint[] 
         .sort((a, b) => a.date.getTime() - b.date.getTime());
 
     const points: ChartDataPoint[] = sorted.map(({ reading, date }) => {
-        const dd = String(date.getDate()).padStart(2, "0");
-        const MM = String(date.getMonth() + 1).padStart(2, "0");
-        const HH = String(date.getHours()).padStart(2, "0");
-        const mm = String(date.getMinutes()).padStart(2, "0");
-
+        const dateField = reading.readingDate || reading.readingAt;
         return {
-            time: `${dd}/${MM} ${HH}:${mm}`, 
-            fullDate: date.toISOString(),
-            flujo: extractValue(reading, "cflow"),   
-            volumen: extractValue(reading, "tflow"), 
+            time: dateField,        
+            fullDate: dateField,    
+            flujo: extractValue(reading, "cflow"),
+            volumen: extractValue(reading, "tflow"),
         };
     });
 

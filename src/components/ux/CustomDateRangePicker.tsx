@@ -46,7 +46,7 @@ const CustomRadio = (props: any) => {
 export default function CustomDateRangePicker({
   value,
   onChange,
-  placeholder = "",
+  placeholder = "Rango de fechas",
   className = "",
 }: CustomDateRangePickerProps) {
   const [focusedValue, setFocusedValue] = useState<DateValue | null>(null);
@@ -140,8 +140,8 @@ export default function CustomDateRangePicker({
                   defaultValue="exact_dates"
                   orientation="horizontal"
                 >
-                  <CustomRadio 
-                    value="exact_dates" 
+                  <CustomRadio
+                    value="exact_dates"
                     onChange={() => {
                       const todayDate = today(getLocalTimeZone());
                       onChange({
@@ -152,32 +152,32 @@ export default function CustomDateRangePicker({
                   >
                     Hoy
                   </CustomRadio>
-                  <CustomRadio 
-                    value="1_day" 
+                  <CustomRadio
+                    value="1_day"
                     onChange={() => handleRadioChange(1)}
                   >
                     1 día
                   </CustomRadio>
-                  <CustomRadio 
-                    value="2_days" 
+                  <CustomRadio
+                    value="2_days"
                     onChange={() => handleRadioChange(2)}
                   >
                     2 días
                   </CustomRadio>
-                  <CustomRadio 
-                    value="3_days" 
+                  <CustomRadio
+                    value="3_days"
                     onChange={() => handleRadioChange(3)}
                   >
                     3 días
                   </CustomRadio>
-                  <CustomRadio 
-                    value="7_days" 
+                  <CustomRadio
+                    value="7_days"
                     onChange={() => handleRadioChange(7)}
                   >
                     7 días
                   </CustomRadio>
-                  <CustomRadio 
-                    value="14_days" 
+                  <CustomRadio
+                    value="14_days"
                     onChange={() => handleRadioChange(14)}
                   >
                     14 días

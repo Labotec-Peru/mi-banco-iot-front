@@ -11,7 +11,7 @@ export const getLecturaFilters = (): FilterFieldDef[] => {
         {
             key: 'dateRange',  
             type: 'dateRange',
-            placeholder: '',
+            placeholder: 'Rango de fechas',
         },        
     ];
 };
