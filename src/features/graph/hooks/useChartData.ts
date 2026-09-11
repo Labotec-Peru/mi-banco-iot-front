@@ -1,5 +1,4 @@
 import { useMemo } from "react";
-import { getResolution, floorToBucket, formatBucketLabel } from "../utils/chartResolution";
 
 export interface ChartDataPoint {
     time: string;
@@ -9,44 +8,32 @@ export interface ChartDataPoint {
     promedio?: number;
 }
 
-/**
- * El medidor reporta en Wialon IPS v2.0:
- *   - cflow: mL/h  → dividir entre 1000 para obtener L/h
- *   - tflow: mL    → dividir entre 1000 para obtener L (acumulado)
- *   - trflow: mL   → (no usado)
- */
-function mlToL(value: number | string | undefined): number {
-    const num = Number(value);
-    if (isNaN(num)) return 0;
-    return num / 1000;
-}
+function extractValue(reading: any, attributeName: string): number {
+    const directField = {
+        cflow: "flow",
+        tflow: "totalFlow",
+    }[attributeName];
 
-function extractFlujo(reading: any): number {
-    let flujo = Number(reading.flow) || 0;
-    if (flujo === 0 && Array.isArray(reading.values)) {
-        const cflow = reading.values.find((v: any) => v.attributeName === "cflow");
-        if (cflow?.value) flujo = parseFloat(cflow.value) || 0;
+    if (directField && reading[directField] !== undefined) {
+        const num = Number(reading[directField]);
+        if (!isNaN(num) && num !== 0) return num;
     }
-    return flujo; // mL/h
-}
 
-function extractVolumen(reading: any): number {
-    let volumen = Number(reading.totalFlow) || 0;
-    if (volumen === 0 && Array.isArray(reading.values)) {
-        const tflow = reading.values.find((v: any) => v.attributeName === "tflow");
-        if (tflow?.value) volumen = parseFloat(tflow.value) || 0;
+    if (Array.isArray(reading.values)) {
+        const found = reading.values.find(
+            (v: any) => v.attributeName === attributeName
+        );
+        if (found?.value !== undefined) {
+            const num = parseFloat(found.value);
+            if (!isNaN(num)) return num;
+        }
     }
-    return volumen; // mL (acumulado)
+
+    return 0;
 }
 
-export function transformReadingsToChartData(
-    readings: any[],
-    startDate?: string,
-    endDate?: string
-): ChartDataPoint[] {
+export function transformReadingsToChartData(readings: any[]): ChartDataPoint[] {
     if (!readings || readings.length === 0) return [];
-
-    const resolution = getResolution(startDate, endDate);
 
     const sorted = [...readings]
         .map((r) => {
@@ -57,54 +44,19 @@ export function transformReadingsToChartData(
         .filter((x): x is { reading: any; date: Date } => x !== null)
         .sort((a, b) => a.date.getTime() - b.date.getTime());
 
-    interface Bucket {
-        date: Date;
-        flujoSum: number;
-        flujoCount: number;
-        volumenMax: number;
-        volumenMin: number;
-        firstVolumen: number;
-        lastVolumen: number;
-    }
+    const points: ChartDataPoint[] = sorted.map(({ reading, date }) => {
+        const dd = String(date.getDate()).padStart(2, "0");
+        const MM = String(date.getMonth() + 1).padStart(2, "0");
+        const HH = String(date.getHours()).padStart(2, "0");
+        const mm = String(date.getMinutes()).padStart(2, "0");
 
-    const buckets = new Map<string, Bucket>();
-
-    for (const { reading, date } of sorted) {
-        const bucketDate = floorToBucket(date, resolution.unit, resolution.amount);
-        const key = bucketDate.toISOString();
-
-        const flujo = mlToL(extractFlujo(reading));     
-        const volumen = mlToL(extractVolumen(reading)); 
-
-        let bucket = buckets.get(key);
-        if (!bucket) {
-            bucket = {
-                date: bucketDate,
-                flujoSum: 0,
-                flujoCount: 0,
-                volumenMax: volumen,
-                volumenMin: volumen,
-                firstVolumen: volumen,
-                lastVolumen: volumen,
-            };
-            buckets.set(key, bucket);
-        }
-
-        bucket.flujoSum += flujo;
-        bucket.flujoCount += 1;
-        bucket.volumenMax = Math.max(bucket.volumenMax, volumen);
-        bucket.volumenMin = Math.min(bucket.volumenMin, volumen);
-        bucket.lastVolumen = volumen;
-    }
-
-    const points: ChartDataPoint[] = Array.from(buckets.values())
-        .sort((a, b) => a.date.getTime() - b.date.getTime())
-        .map((b) => ({
-            time: formatBucketLabel(b.date, resolution),
-            fullDate: b.date.toISOString(),
-            flujo: b.flujoCount > 0 ? b.flujoSum / b.flujoCount : 0,
-            volumen: Math.max(0, b.volumenMax - b.volumenMin),
-        }));
+        return {
+            time: `${dd}/${MM} ${HH}:${mm}`, 
+            fullDate: date.toISOString(),
+            flujo: extractValue(reading, "cflow"),   
+            volumen: extractValue(reading, "tflow"), 
+        };
+    });
 
     const promedioGlobal =
         points.length > 0
@@ -114,16 +66,12 @@ export function transformReadingsToChartData(
     return points.map((p) => ({ ...p, promedio: promedioGlobal }));
 }
 
-export function useChartData(
-    readings: any,
-    startDate?: string,
-    endDate?: string
-): ChartDataPoint[] {
+export function useChartData(readings: any): ChartDataPoint[] {
     return useMemo(() => {
         if (!readings) return [];
         const rawReadings = Array.isArray(readings)
             ? readings
             : readings?.content ?? [];
-        return transformReadingsToChartData(rawReadings, startDate, endDate);
-    }, [readings, startDate, endDate]);
+        return transformReadingsToChartData(rawReadings);
+    }, [readings]);
 }

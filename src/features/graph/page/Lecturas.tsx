@@ -1,8 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Button, Spinner } from "@heroui/react";
+import { Button } from "@heroui/react";
 import type { RangeValue, DateValue } from "@heroui/react";
 import { Autocomplete, AutocompleteItem } from "@heroui/react";
-import { Magnifer } from "@solar-icons/react";
 import { useWaterMeters } from "@/features/medidores/hooks/useWaterMeters";
 import ModalLectura from "../components/ModalLectura";
 import { getLecturaFilters } from "../config/lecturaFilters";
@@ -15,11 +14,11 @@ import { useReadings } from "../hooks/useReadings";
 import PageContainer from "@/layouts/PageContainer";
 import StatsRow from "@/features/dashboard/components/StatsRow";
 import CustomDateRangePicker from "@/components/ux/CustomDateRangePicker";
+import { Magnifer, Refresh } from "@solar-icons/react";
 
 export default function Lecturas() {
     const [filterValues, setFilterValues] = useState<Record<string, string>>({});
     const [dateRange, setDateRange] = useState<RangeValue<DateValue> | null>(null);
-
     const [appliedFilters, setAppliedFilters] = useState<Record<string, string>>({});
 
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -27,7 +26,6 @@ export default function Lecturas() {
     const [selectedWaterMeterId] = useState<number | undefined>();
 
     const { waterMeters, isLoading: isLoadingMeters } = useWaterMeters();
-
     const { create, refetch } = useReadings();
 
     const {
@@ -42,11 +40,7 @@ export default function Lecturas() {
         enabled: true,
     });
 
-    const chartData = useChartData(
-        chartReadings,
-        appliedFilters.startDate,
-        appliedFilters.endDate
-    );
+    const chartData = useChartData(chartReadings);
 
     const initializedMeterRef = useRef(false);
     useEffect(() => {
@@ -109,6 +103,10 @@ export default function Lecturas() {
         setAppliedFilters({ ...filterValues });
     };
 
+    const handleRefresh = () => {
+    setAppliedFilters({ ...appliedFilters });
+};
+
     const handleClearFilters = () => {
         const defaultMeterId = waterMeters.length > 0
             ? waterMeters[0].id.toString()
@@ -122,7 +120,6 @@ export default function Lecturas() {
         setAppliedFilters(cleared);
         setDateRange(null);
     };
-
 
     const handleModalSubmit = async (data: any) => {
         setIsSubmitting(true);
@@ -138,8 +135,6 @@ export default function Lecturas() {
             setIsSubmitting(false);
         }
     };
-
-
 
     return (
         <PageContainer>
@@ -203,6 +198,18 @@ export default function Lecturas() {
                     <Button size="sm" variant="flat" onPress={handleClearFilters}>
                         Limpiar
                     </Button>
+                    <Button
+                        size="sm"
+                        variant="flat"
+                        color="primary"
+                        isIconOnly
+                        onPress={handleRefresh}
+                        isLoading={isFetchingChart}
+                        isDisabled={isFetchingChart}
+                        aria-label="Actualizar datos"
+                    >
+                        <Refresh size={16} weight="Bold" />
+                    </Button>
                 </div>
 
                 <FlowVolumeChart data={chartData} />
@@ -215,6 +222,6 @@ export default function Lecturas() {
                 isLoading={isSubmitting}
                 waterMeterId={selectedWaterMeterId}
             />
-        </PageContainer >
+        </PageContainer>
     );
 }

@@ -58,7 +58,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
                         <span className="w-2 h-2 rounded-full bg-primary" />
                         <span className="text-default-600">Flujo:</span>
                     </div>
-                    <span className="font-semibold">{flujo.toFixed(2)} L/h</span>
+                    <span className="font-semibold">{flujo.toFixed(2)} mL/h</span>
                 </div>
             )}
 
@@ -68,7 +68,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
                         <span className="w-2 h-2 rounded-full bg-secondary" />
                         <span className="text-default-600">Volumen:</span>
                     </div>
-                    <span className="font-semibold">{volumen.toFixed(2)} L</span>
+                    <span className="font-semibold">{volumen.toFixed(3)}</span>
                 </div>
             )}
 
@@ -78,7 +78,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
                         <span className="w-2 h-2 rounded-full bg-default-400" />
                         <span className="text-default-600">Promedio:</span>
                     </div>
-                    <span className="font-semibold">{promedio.toFixed(2)} L/h</span>
+                    <span className="font-semibold">{promedio.toFixed(2)} mL/h</span>
                 </div>
             )}
         </div>
@@ -95,14 +95,16 @@ export default function FlowVolumeChart({
         flujoProm: data.length > 0
             ? data.reduce((sum, d) => sum + d.flujo, 0) / data.length
             : 0,
-        volumenTotal: data.reduce((sum, d) => sum + d.volumen, 0),
+        volumenTotal: data.length > 1
+            ? data[data.length - 1].volumen - data[0].volumen
+            : 0,
     };
 
     const renderChart = (type: 'flujo' | 'volumen') => {
         const isFlujo = type === 'flujo';
         const color = isFlujo ? '#00A64F' : '#FFD100';
         const dataKey = isFlujo ? 'flujo' : 'volumen';
-        const label = isFlujo ? 'Flujo (L/h)' : 'Volumen (L)';
+        const label = isFlujo ? 'Flujo' : 'Volumen (m³)';
         const yAxisId = 'main';
 
         if (data.length === 0) {
@@ -139,7 +141,7 @@ export default function FlowVolumeChart({
                             tickLine={false}
                             axisLine={false}
                             interval="preserveStartEnd"
-                            minTickGap={30}
+                            minTickGap={60}
                         />
 
                         <YAxis
@@ -295,11 +297,11 @@ export default function FlowVolumeChart({
                     </div>
                     <div className="text-center">
                         <p className="text-[10px] text-default-500">Flujo prom</p>
-                        <p className="text-sm font-bold">{stats.flujoProm.toFixed(2)} L/h</p>
+                        <p className="text-sm font-bold">{stats.flujoProm.toFixed(2)} mL/h</p>
                     </div>
                     <div className="text-center">
                         <p className="text-[10px] text-default-500">Volumen total</p>
-                        <p className="text-sm font-bold">{stats.volumenTotal.toFixed(2)} L</p>
+                        <p className="text-sm font-bold">{stats.volumenTotal.toFixed(2)} mL</p>
                     </div>
                     <div className="text-center">
                         <p className="text-[10px] text-default-500">Lecturas</p>
