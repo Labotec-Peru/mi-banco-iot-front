@@ -1,38 +1,26 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Button } from "@heroui/react";
+import { Button, Spinner } from "@heroui/react";
 import type { RangeValue, DateValue } from "@heroui/react";
-import { AddCircle, FileDownload } from "@solar-icons/react";
-import type { Lectura } from "../types/lectura";
-import { useReadings } from "../hooks/useReadings";
+import { Autocomplete, AutocompleteItem } from "@heroui/react";
+import { AddCircle, FileDownload, Magnifer } from "@solar-icons/react";
 import { useWaterMeters } from "@/features/medidores/hooks/useWaterMeters";
 import ModalLectura from "../components/ModalLectura";
-import { getLecturaColumns } from "../components/LecturaColumns";
 import { getLecturaFilters } from "../config/lecturaFilters";
-import FlowVolumeChart from "@/components/ux/ConsumptionChart";
+import FlowVolumeChart from "@/components/ux/FlowVolumeChart";
 import { getLocalTimeZone } from "@internationalized/date";
-import TableComponent, { type ViewMode } from "../../../components/ux/TableComponent";
 import { useChartData } from "../hooks/useChartData";
 import { endOfDayInstant, startOfDayInstant } from "@/utils/date";
-
 import { useChartReadings } from "../hooks/useChartReadings";
+import { useReadings } from "../hooks/useReadings";
 import PageContainer from "@/layouts/PageContainer";
 import StatsRow from "@/features/dashboard/components/StatsRow";
-
+import CustomDateRangePicker from "@/components/ux/CustomDateRangePicker";
 
 export default function Lecturas() {
-    const [viewMode, setViewMode] = useState<ViewMode>("table");
     const [filterValues, setFilterValues] = useState<Record<string, string>>({});
-    const [sortDescriptor, setSortDescriptor] = useState<{
-        column: string;
-        direction: "ascending" | "descending";
-    }>({
-        column: "readingDate",
-        direction: "descending",
-    });
-    const [page, setPage] = useState(1);
-    const [pageSize, setPageSize] = useState(15);
-
     const [dateRange, setDateRange] = useState<RangeValue<DateValue> | null>(null);
+
+    const [appliedFilters, setAppliedFilters] = useState<Record<string, string>>({});
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -40,28 +28,25 @@ export default function Lecturas() {
 
     const { waterMeters, isLoading: isLoadingMeters } = useWaterMeters();
 
-    const {
-        readings,
-        pagination,
-        isLoading,
-        error,
-        create,
-        refetch,
-        setFilters,
-    } = useReadings();
-
+    const { create, refetch } = useReadings();
 
     const {
-        readings: chartReadings } = useChartReadings({
-        waterMeterId: filterValues.waterMeterId
-            ? Number(filterValues.waterMeterId)
+        readings: chartReadings,
+        isFetching: isFetchingChart,
+    } = useChartReadings({
+        waterMeterId: appliedFilters.waterMeterId
+            ? Number(appliedFilters.waterMeterId)
             : undefined,
-        startDate: filterValues.startDate,
-        endDate: filterValues.endDate,
-        enabled: viewMode === "chart",
+        startDate: appliedFilters.startDate,
+        endDate: appliedFilters.endDate,
+        enabled: true,
     });
 
-    const chartData = useChartData(chartReadings);
+    const chartData = useChartData(
+        chartReadings,
+        appliedFilters.startDate,
+        appliedFilters.endDate
+    );
 
     const initializedMeterRef = useRef(false);
     useEffect(() => {
@@ -77,44 +62,12 @@ export default function Lecturas() {
                 ...prev,
                 waterMeterId: firstMeterId,
             }));
+            setAppliedFilters((prev) => ({
+                ...prev,
+                waterMeterId: firstMeterId,
+            }));
         }
     }, [isLoadingMeters, waterMeters, filterValues.waterMeterId]);
-
-
-    useEffect(() => {
-        if (!filterValues.waterMeterId) return;
-
-        const filters: any = {
-            page: page - 1,
-            size: pageSize,
-            waterMeterId: Number(filterValues.waterMeterId),
-        };
-
-        if (filterValues.startDate) {
-            filters.startDate = filterValues.startDate;
-        }
-        if (filterValues.endDate) {
-            filters.endDate = filterValues.endDate;
-        }
-
-        if (filterValues.status) {
-            filters.status = filterValues.status;
-        }
-        if (filterValues.search) {
-            filters.search = filterValues.search;
-        }
-
-        setFilters(filters);
-    }, [
-        page,
-        pageSize,
-        filterValues.waterMeterId,
-        filterValues.startDate,
-        filterValues.endDate,
-        filterValues.status,
-        filterValues.search,
-        setFilters,
-    ]);
 
     useEffect(() => {
         if (dateRange?.start && dateRange?.end) {
@@ -136,46 +89,6 @@ export default function Lecturas() {
         }
     }, [dateRange]);
 
-    const sortedReadings = useMemo(() => {
-        let rows = [...readings];
-
-        if (rows.length === 0) return rows;
-
-        const columnMap: Record<string, keyof Lectura> = {
-            id: "id",
-            waterMeterId: "waterMeterId",
-            value: "value",
-            consumption: "consumption",
-            readingDate: "readingDate",
-            status: "status",
-            createdAt: "createdAt",
-            updatedAt: "updatedAt",
-        };
-
-        const column = columnMap[sortDescriptor.column];
-
-        if (column) {
-            rows.sort((a, b) => {
-                const av = String(a[column] ?? "");
-                const bv = String(b[column] ?? "");
-                const cmp = av.localeCompare(bv);
-                return sortDescriptor.direction === "ascending" ? cmp : -cmp;
-            });
-        }
-
-        return rows;
-    }, [readings, sortDescriptor]);
-
-    useEffect(() => {
-        setPage(1);
-    }, [
-        filterValues.waterMeterId,
-        filterValues.startDate,
-        filterValues.endDate,
-        filterValues.status,
-        filterValues.search,
-    ]);
-
     const lecturaFilters = useMemo(() => {
         const baseFilters = getLecturaFilters();
         return baseFilters.map((filter) => {
@@ -192,8 +105,8 @@ export default function Lecturas() {
         });
     }, [waterMeters]);
 
-    const handleFilterChange = (key: string, value: string) => {
-        setFilterValues((prev) => ({ ...prev, [key]: value }));
+    const handleSearch = () => {
+        setAppliedFilters({ ...filterValues });
     };
 
     const handleClearFilters = () => {
@@ -201,17 +114,15 @@ export default function Lecturas() {
             ? waterMeters[0].id.toString()
             : undefined;
 
-        setFilterValues(
-            defaultMeterId ? { waterMeterId: defaultMeterId } : {}
-        );
+        const cleared: Record<string, string> = defaultMeterId
+            ? { waterMeterId: defaultMeterId }
+            : {};
+
+        setFilterValues(cleared);
+        setAppliedFilters(cleared);
         setDateRange(null);
-        setPage(1);
     };
 
-    const handleCreate = () => {
-        setSelectedWaterMeterId(undefined);
-        setIsModalOpen(true);
-    };
 
     const handleModalSubmit = async (data: any) => {
         setIsSubmitting(true);
@@ -228,114 +139,74 @@ export default function Lecturas() {
         }
     };
 
-    const handleExportExcel = () => {
-        console.log("Exportar a Excel", sortedReadings);
-    };
 
-    const handleDateRangeChange = (range: RangeValue<DateValue> | null) => {
-        setDateRange(range);
-    };
-
-    const renderCardView = (item: Lectura) => {
-        return (
-            <div className="bg-white dark:bg-zinc-800 rounded-lg shadow p-4 border border-zinc-200 dark:border-zinc-700">
-                <div className="flex justify-between items-start mb-2">
-                    <h3 className="font-semibold text-sm">Lectura #{item.id}</h3>
-                    <span
-                        className={`text-xs px-2 py-1 rounded-full ${item.status === "ACTIVE"
-                            ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
-                            : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
-                            }`}
-                    >
-                        {item.status}
-                    </span>
-                </div>
-                <div className="space-y-1 text-xs">
-                    <div className="flex justify-between">
-                        <span className="text-default-500">Medidor:</span>
-                        <span>{item.waterMeterId}</span>
-                    </div>
-                    <div className="flex justify-between">
-                        <span className="text-default-500">Valor:</span>
-                        <span className="font-medium">{item.value}</span>
-                    </div>
-                    <div className="flex justify-between">
-                        <span className="text-default-500">Consumo:</span>
-                        <span>{item.consumption}</span>
-                    </div>
-                    <div className="flex justify-between">
-                        <span className="text-default-500">Fecha:</span>
-                        <span>{item.readingDate}</span>
-                    </div>
-                </div>
-            </div>
-        );
-    };
-
-    if (error) {
-        return (
-            <div className="flex flex-col items-center justify-center h-64 gap-4">
-                <div className="text-danger">Error al cargar las lecturas</div>
-                <Button color="primary" onPress={refetch}>
-                    Reintentar
-                </Button>
-            </div>
-        );
-    }
 
     return (
         <PageContainer>
             <StatsRow />
+
             <div className="flex flex-col gap-4">
-                <TableComponent<Lectura>
-                    data={sortedReadings}
-                    columns={getLecturaColumns({
-                        onView: (lectura) => console.log("Ver lectura:", lectura),
+                <div className="flex flex-wrap items-center gap-2">
+                    {lecturaFilters.map((filter) => {
+                        if (filter.key === "waterMeterId") {
+                            return (
+                                <Autocomplete
+                                    key={filter.key}
+                                    label={filter.placeholder}
+                                    placeholder="Buscar medidor..."
+                                    className="max-w-xs"
+                                    size="sm"
+                                    selectedKey={filterValues.waterMeterId ?? null}
+                                    onSelectionChange={(key) => {
+                                        setFilterValues((prev) => ({
+                                            ...prev,
+                                            waterMeterId: key ? String(key) : "",
+                                        }));
+                                    }}
+                                    isClearable
+                                    allowsCustomValue={false}
+                                >
+                                    {(filter.options ?? []).map((opt) => (
+                                        <AutocompleteItem key={opt.value} textValue={opt.label}>
+                                            {opt.label}
+                                        </AutocompleteItem>
+                                    ))}
+                                </Autocomplete>
+                            );
+                        }
+
+                        if (filter.key === "dateRange" || filter.type === "dateRange") {
+                            return (
+                                <CustomDateRangePicker
+                                    key={filter.key}
+                                    value={dateRange}
+                                    onChange={setDateRange}
+                                    placeholder={filter.placeholder ?? "Rango de fechas"}
+                                    className="w-66"
+                                />
+                            );
+                        }
+
+                        return null;
                     })}
-                    idField="id"
-                    filters={lecturaFilters}
-                    filterValues={filterValues}
-                    isLoading={isLoading || isLoadingMeters}
-                    onFilterChange={handleFilterChange}
-                    onClearFilters={handleClearFilters}
-                    headerActions={
-                        <div className="flex items-center gap-2">
-                            <Button
-                                size="sm"
-                                color="primary"
-                                startContent={<AddCircle size={16} />}
-                                onPress={handleCreate}
-                            >
-                                Nueva lectura
-                            </Button>
-                            <Button
-                                size="sm"
-                                variant="flat"
-                                startContent={<FileDownload size={16} />}
-                                onPress={handleExportExcel}
-                            >
-                                Exportar Excel
-                            </Button>
-                        </div>
-                    }
-                    sortDescriptor={sortDescriptor}
-                    onSortChange={setSortDescriptor}
-                    page={page}
-                    pageSize={pageSize}
-                    totalRegistros={pagination.totalElements}
-                    onPageChange={setPage}
-                    onPageSizeChange={(size) => {
-                        setPageSize(size);
-                        setPage(1);
-                    }}
-                    viewMode={viewMode}
-                    onViewModeChange={setViewMode}
-                    cardView={renderCardView}
-                    chartComponent={<FlowVolumeChart data={chartData} />}
-                    dateRangeValue={dateRange}
-                    onDateRangeChange={handleDateRangeChange}
-                    availableViews={["table", "chart"]}
-                />
+
+                    <Button
+                        size="sm"
+                        color="primary"
+                        startContent={<Magnifer size={16} weight="Bold" />}
+                        onPress={handleSearch}
+                        isLoading={isFetchingChart}
+                        isDisabled={isFetchingChart}
+                    >
+                        Buscar
+                    </Button>
+
+                    <Button size="sm" variant="flat" onPress={handleClearFilters}>
+                        Limpiar
+                    </Button>
+                </div>
+
+                <FlowVolumeChart data={chartData} />
             </div>
 
             <ModalLectura
@@ -345,6 +216,6 @@ export default function Lecturas() {
                 isLoading={isSubmitting}
                 waterMeterId={selectedWaterMeterId}
             />
-        </PageContainer>
+        </PageContainer >
     );
 }

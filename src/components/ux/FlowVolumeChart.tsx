@@ -25,50 +25,64 @@ interface FlowVolumeChartProps {
 }
 
 const CustomTooltip = ({ active, payload, label }: any) => {
-    if (active && payload && payload.length) {
-        return (
-            <div className="bg-white dark:bg-default-100 p-3 rounded-lg shadow-lg min-w-[200px]">
-                <p className="text-sm font-bold mb-2">{label}</p>
+    if (!active || !payload || !payload.length) return null;
 
-                {payload.find((p: any) => p.dataKey === 'flujo') && (
-                    <div className="flex items-center justify-between gap-4 text-xs mb-1">
-                        <div className="flex items-center gap-2">
-                            <span className="w-2 h-2 rounded-full bg-primary" />
-                            <span className="text-default-600">Flujo:</span>
-                        </div>
-                        <span className="font-semibold">
-                            {payload.find((p: any) => p.dataKey === 'flujo').value.toFixed(2)} L/h
-                        </span>
-                    </div>
-                )}
+    const getValue = (key: string): number | null => {
+        const item = payload.find((p: any) => p.dataKey === key);
+        const val = item?.value;
+        return typeof val === "number" && !isNaN(val) ? val : null;
+    };
 
-                {payload.find((p: any) => p.dataKey === 'volumen') && (
-                    <div className="flex items-center justify-between gap-4 text-xs mb-1">
-                        <div className="flex items-center gap-2">
-                            <span className="w-2 h-2 rounded-full bg-secondary" />
-                            <span className="text-default-600">Volumen:</span>
-                        </div>
-                        <span className="font-semibold">
-                            {payload.find((p: any) => p.dataKey === 'volumen').value.toFixed(2)} L
-                        </span>
-                    </div>
-                )}
+    const flujo = getValue("flujo");
+    const volumen = getValue("volumen");
+    const promedio = getValue("promedio");
 
-                {payload.find((p: any) => p.dataKey === 'promedio') && (
-                    <div className="flex items-center justify-between gap-4 text-xs">
-                        <div className="flex items-center gap-2">
-                            <span className="w-2 h-2 rounded-full bg-default-400" />
-                            <span className="text-default-600">Promedio:</span>
-                        </div>
-                        <span className="font-semibold">
-                            {payload.find((p: any) => p.dataKey === 'promedio').value.toFixed(2)} L/h
-                        </span>
+    const fullDate = payload[0]?.payload?.fullDate;
+    const dateLabel = fullDate
+        ? new Date(fullDate).toLocaleString("es-ES", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+        })
+        : label;
+
+    return (
+        <div className="bg-white dark:bg-default-100 p-3 rounded-lg shadow-lg min-w-[200px]">
+            <p className="text-sm font-bold mb-2">{dateLabel}</p>
+
+            {flujo !== null && (
+                <div className="flex items-center justify-between gap-4 text-xs mb-1">
+                    <div className="flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-primary" />
+                        <span className="text-default-600">Flujo:</span>
                     </div>
-                )}
-            </div>
-        );
-    }
-    return null;
+                    <span className="font-semibold">{flujo.toFixed(2)} L/h</span>
+                </div>
+            )}
+
+            {volumen !== null && (
+                <div className="flex items-center justify-between gap-4 text-xs mb-1">
+                    <div className="flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-secondary" />
+                        <span className="text-default-600">Volumen:</span>
+                    </div>
+                    <span className="font-semibold">{volumen.toFixed(2)} L</span>
+                </div>
+            )}
+
+            {promedio !== null && (
+                <div className="flex items-center justify-between gap-4 text-xs">
+                    <div className="flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-default-400" />
+                        <span className="text-default-600">Promedio:</span>
+                    </div>
+                    <span className="font-semibold">{promedio.toFixed(2)} L/h</span>
+                </div>
+            )}
+        </div>
+    );
 };
 
 export default function FlowVolumeChart({
@@ -76,15 +90,12 @@ export default function FlowVolumeChart({
     title = "Flujo y Volumen de Consumo",
 }: FlowVolumeChartProps) {
     const [metric, setMetric] = useState<'flujo' | 'volumen' | 'ambos'>('ambos');
-    console.log("datape", data)
     const stats = {
         flujoMax: data.length > 0 ? Math.max(...data.map(d => d.flujo)) : 0,
         flujoProm: data.length > 0
             ? data.reduce((sum, d) => sum + d.flujo, 0) / data.length
             : 0,
-        volumenTotal: data.length > 0
-            ? Math.max(...data.map(d => d.volumen))
-            : 0,
+        volumenTotal: data.reduce((sum, d) => sum + d.volumen, 0),
     };
 
     const renderChart = (type: 'flujo' | 'volumen') => {
@@ -127,8 +138,8 @@ export default function FlowVolumeChart({
                             tick={{ fontSize: 9, fill: '#6b7280' }}
                             tickLine={false}
                             axisLine={false}
-                            interval="preserveStartEnd"  
-                            minTickGap={20}              
+                            interval="preserveStartEnd"
+                            minTickGap={30}
                         />
 
                         <YAxis
@@ -249,7 +260,7 @@ export default function FlowVolumeChart({
                                 startContent={<ArrowUp className="w-3 h-3" weight="Bold" />}
                             >
                                 Volumen
-                            </Button>                          
+                            </Button>
                         </div>
                     </div>
                 </div>

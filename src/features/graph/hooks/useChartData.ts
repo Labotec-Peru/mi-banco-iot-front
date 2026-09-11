@@ -1,69 +1,129 @@
 import { useMemo } from "react";
+import { getResolution, floorToBucket, formatBucketLabel } from "../utils/chartResolution";
 
 export interface ChartDataPoint {
-  time: string;     
-  fullDate: string;
-  volumen: number;
-  flujo: number;
-  promedio?: number;
+    time: string;
+    fullDate: string;
+    volumen: number;
+    flujo: number;
+    promedio?: number;
 }
 
+/**
+ * El medidor reporta en Wialon IPS v2.0:
+ *   - cflow: mL/h  → dividir entre 1000 para obtener L/h
+ *   - tflow: mL    → dividir entre 1000 para obtener L (acumulado)
+ *   - trflow: mL   → (no usado)
+ */
 function mlToL(value: number | string | undefined): number {
-  const num = Number(value);
-  return isNaN(num) ? 0 : num / 1000;
+    const num = Number(value);
+    if (isNaN(num)) return 0;
+    return num / 1000;
 }
 
-
-export function transformReadingsToChartData(readings: any[]): ChartDataPoint[] {
-  if (!readings || readings.length === 0) return [];
-
-  return [...readings]
-    .sort(
-      (a, b) =>
-        new Date(a.readingDate || a.readingAt).getTime() -
-        new Date(b.readingDate || b.readingAt).getTime()
-    )
-    .map((reading) => {
-      const dateField = reading.readingDate || reading.readingAt;
-      if (!dateField) return null;
-
-      const date = new Date(dateField);
-      if (isNaN(date.getTime())) return null;
-
-      let flujoML = Number(reading.flow) || 0;
-      let volumenML = Number(reading.totalFlow) || 0;
-
-      if (reading.values && Array.isArray(reading.values)) {
-        if (flujoML === 0) {
-          const cflow = reading.values.find((v: any) => v.attributeName === "cflow");
-          if (cflow?.value) flujoML = parseFloat(cflow.value) || 0;
-        }
-        if (volumenML === 0) {
-          const tflow = reading.values.find((v: any) => v.attributeName === "tflow");
-          if (tflow?.value) volumenML = parseFloat(tflow.value) || 0;
-        }
-      }
-
-      const day = String(date.getDate()).padStart(2, "0");
-      const month = String(date.getMonth() + 1).padStart(2, "0");
-
-      return {
-        time: `${day}/${month}`,
-        fullDate: dateField,
-        volumen: mlToL(volumenML),
-        flujo: mlToL(flujoML),
-      };
-    })
-    .filter((item): item is ChartDataPoint => item !== null);
+function extractFlujo(reading: any): number {
+    let flujo = Number(reading.flow) || 0;
+    if (flujo === 0 && Array.isArray(reading.values)) {
+        const cflow = reading.values.find((v: any) => v.attributeName === "cflow");
+        if (cflow?.value) flujo = parseFloat(cflow.value) || 0;
+    }
+    return flujo; // mL/h
 }
 
+function extractVolumen(reading: any): number {
+    let volumen = Number(reading.totalFlow) || 0;
+    if (volumen === 0 && Array.isArray(reading.values)) {
+        const tflow = reading.values.find((v: any) => v.attributeName === "tflow");
+        if (tflow?.value) volumen = parseFloat(tflow.value) || 0;
+    }
+    return volumen; // mL (acumulado)
+}
 
-export function useChartData(readings: any): ChartDataPoint[] {
-  return useMemo(() => {
-    if (!readings) return [];
-    const rawReadings = Array.isArray(readings)
-      ? readings
-      : readings?.content ?? [];
-    return transformReadingsToChartData(rawReadings);
-  }, [readings]);
+export function transformReadingsToChartData(
+    readings: any[],
+    startDate?: string,
+    endDate?: string
+): ChartDataPoint[] {
+    if (!readings || readings.length === 0) return [];
+
+    const resolution = getResolution(startDate, endDate);
+
+    const sorted = [...readings]
+        .map((r) => {
+            const dateField = r.readingDate || r.readingAt;
+            const date = dateField ? new Date(dateField) : null;
+            return date && !isNaN(date.getTime()) ? { reading: r, date } : null;
+        })
+        .filter((x): x is { reading: any; date: Date } => x !== null)
+        .sort((a, b) => a.date.getTime() - b.date.getTime());
+
+    interface Bucket {
+        date: Date;
+        flujoSum: number;
+        flujoCount: number;
+        volumenMax: number;
+        volumenMin: number;
+        firstVolumen: number;
+        lastVolumen: number;
+    }
+
+    const buckets = new Map<string, Bucket>();
+
+    for (const { reading, date } of sorted) {
+        const bucketDate = floorToBucket(date, resolution.unit, resolution.amount);
+        const key = bucketDate.toISOString();
+
+        const flujo = mlToL(extractFlujo(reading));     
+        const volumen = mlToL(extractVolumen(reading)); 
+
+        let bucket = buckets.get(key);
+        if (!bucket) {
+            bucket = {
+                date: bucketDate,
+                flujoSum: 0,
+                flujoCount: 0,
+                volumenMax: volumen,
+                volumenMin: volumen,
+                firstVolumen: volumen,
+                lastVolumen: volumen,
+            };
+            buckets.set(key, bucket);
+        }
+
+        bucket.flujoSum += flujo;
+        bucket.flujoCount += 1;
+        bucket.volumenMax = Math.max(bucket.volumenMax, volumen);
+        bucket.volumenMin = Math.min(bucket.volumenMin, volumen);
+        bucket.lastVolumen = volumen;
+    }
+
+    const points: ChartDataPoint[] = Array.from(buckets.values())
+        .sort((a, b) => a.date.getTime() - b.date.getTime())
+        .map((b) => ({
+            time: formatBucketLabel(b.date, resolution),
+            fullDate: b.date.toISOString(),
+            flujo: b.flujoCount > 0 ? b.flujoSum / b.flujoCount : 0,
+            volumen: Math.max(0, b.volumenMax - b.volumenMin),
+        }));
+
+    const promedioGlobal =
+        points.length > 0
+            ? points.reduce((sum, p) => sum + p.flujo, 0) / points.length
+            : 0;
+
+    return points.map((p) => ({ ...p, promedio: promedioGlobal }));
+}
+
+export function useChartData(
+    readings: any,
+    startDate?: string,
+    endDate?: string
+): ChartDataPoint[] {
+    return useMemo(() => {
+        if (!readings) return [];
+        const rawReadings = Array.isArray(readings)
+            ? readings
+            : readings?.content ?? [];
+        return transformReadingsToChartData(rawReadings, startDate, endDate);
+    }, [readings, startDate, endDate]);
 }

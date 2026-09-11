@@ -95,7 +95,7 @@ export default function CustomDateRangePicker({
           variant="flat"
           color="default"
           radius="sm"
-          className="h-10 w-full max-w-57 justify-start px-3"
+          className="h-12 w-full max-w-57 justify-start px-3 "
         >
           <div className="flex items-center gap-3 w-full">
             <div className="flex flex-col items-start min-w-0">

@@ -7,9 +7,8 @@ interface UseChartReadingsParams {
     waterMeterId?: number;
     startDate?: string;
     endDate?: string;
-    enabled?: boolean;  
+    enabled?: boolean;
 }
-
 export function useChartReadings({
     waterMeterId,
     startDate,
@@ -18,26 +17,17 @@ export function useChartReadings({
 }: UseChartReadingsParams) {
     const shouldFetch = enabled && !!waterMeterId;
 
-    const { data, isLoading, error } = useGetAllReadingsQuery(
-        {
-            waterMeterId,
-            startDate,
-            endDate,
-        },
-        {
-            skip: !shouldFetch,  
-        }
+    const { data, isLoading, isFetching, error, refetch } = useGetAllReadingsQuery(
+        { waterMeterId, startDate, endDate },
+        { skip: !shouldFetch }
     );
 
+    
     const readings: Lectura[] = useMemo(() => {
         if (!data) return [];
         const raw = Array.isArray(data) ? data : data?.content ?? [];
         return mapApiToLecturas(raw);
     }, [data]);
 
-    return {
-        readings,
-        isLoading,
-        error,
-    };
+    return { readings, isLoading, isFetching, error, refetch };
 }
