@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Button, Spinner } from "@heroui/react";
 import type { RangeValue, DateValue } from "@heroui/react";
 import { Autocomplete, AutocompleteItem } from "@heroui/react";
-import { AddCircle, FileDownload, Magnifer } from "@solar-icons/react";
+import { Magnifer } from "@solar-icons/react";
 import { useWaterMeters } from "@/features/medidores/hooks/useWaterMeters";
 import ModalLectura from "../components/ModalLectura";
 import { getLecturaFilters } from "../config/lecturaFilters";
@@ -24,7 +24,7 @@ export default function Lecturas() {
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [selectedWaterMeterId, setSelectedWaterMeterId] = useState<number | undefined>();
+    const [selectedWaterMeterId] = useState<number | undefined>();
 
     const { waterMeters, isLoading: isLoadingMeters } = useWaterMeters();
 
@@ -193,7 +193,6 @@ export default function Lecturas() {
                     <Button
                         size="sm"
                         color="primary"
-                        startContent={<Magnifer size={16} weight="Bold" />}
                         onPress={handleSearch}
                         isLoading={isFetchingChart}
                         isDisabled={isFetchingChart}
